@@ -62,12 +62,25 @@ Every screen is keyed to its **Activity ID** from the spec. Example: activity `D
 ---
 
 ## 2) Tailwind & Assets
-**tailwind.config.js**
+**tailwind.config.js** (Multi-tenant theming support)
 ```js
 module.exports = {
   content: ["./src/web/views/**/*.ejs", "./src/web/public/js/**/*.js"],
-  theme: { extend: {} },
-  plugins: [],
+  theme: { 
+    extend: {
+      // Default palette - tenant themes will override via CSS custom properties
+      colors: {
+        'tenant-primary': 'var(--tenant-primary, #3b82f6)',
+        'tenant-secondary': 'var(--tenant-secondary, #64748b)',
+        'tenant-accent': 'var(--tenant-accent, #10b981)',
+        'tenant-bg': 'var(--tenant-bg, #f8fafc)',
+      }
+    } 
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography')
+  ],
 };
 ```
 **NPM scripts**
@@ -395,7 +408,78 @@ Run: `ts-node scripts/scaffold-activity.ts fees FEES-01-001`
 
 ---
 
-## 17) Appendix — Minimal `api-client` (UI side)
+## 17) Multi-Format Export System
+**Print & Export Layouts**
+- **PDF receipts:** Separate print-optimized EJS layouts with @media print styles
+- **Excel reports:** Server-side generation using ExcelJS with branded headers  
+- **Screen reports:** Interactive tables with Chart.js visualizations + export buttons
+- **Student documents:** PDF templates with trust branding and digital signatures
+
+**Export Controller Pattern**
+```ts
+// routes/export.ts
+export const exportRouter = Router();
+
+exportRouter.get('/receipt/:id/pdf', requireRole('SCHOOL_ADMIN'), async (req, res) => {
+  const receiptData = await api.get(`/fees/receipts/${req.params.id}`, { ctx: res.locals.ctx });
+  const html = await ejs.render('exports/receipt-pdf.ejs', { data: receiptData, trust: res.locals.trust });
+  const pdf = await htmlToPdf(html);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.send(pdf);
+});
+```
+
+---
+
+## 18) Interactive Features (Richer but Simple)
+**Chart.js Dashboards**
+```js
+// public/js/dashboard.js
+function initDashboardCharts(data) {
+  // Enrollment trend chart
+  new Chart(document.getElementById('enrollmentChart'), {
+    type: 'line',
+    data: data.enrollmentTrend,
+    options: { responsive: true, plugins: { legend: { display: true }}}
+  });
+  
+  // Fee collection donut chart
+  new Chart(document.getElementById('feeChart'), {
+    type: 'doughnut', 
+    data: data.feeCollections,
+    options: { responsive: true }
+  });
+}
+```
+
+**Form Enhancements**
+- **Auto-complete:** For student/parent search with debounced API calls
+- **File upload:** Drag & drop with progress indicators and preview
+- **Date pickers:** Native HTML5 with fallback for better UX
+- **Form wizards:** Step validation with progress indicators
+- **Live search:** Real-time filtering of tables and lists
+
+---
+
+## 19) File Storage Configuration (Per Tenant)
+**Backend Integration:** Uses trust_config table for tenant-specific storage settings
+```ts
+// middleware/file-storage.ts  
+export async function getStorageConfig(trustId: number) {
+  // Fetch from trust_config: storage_type (local|s3|azure), storage_path, etc.
+  const config = await getTrustConfig(trustId, 'storage');
+  return {
+    type: config.storage_type || 'local',
+    basePath: config.storage_path || '/uploads',
+    maxFileSize: config.max_file_size || '10MB',
+    allowedTypes: config.allowed_file_types || ['pdf', 'jpg', 'png', 'doc', 'xlsx']
+  };
+}
+```
+
+---
+
+## 20) Appendix — Enhanced `api-client` (UI side)
 ```ts
 // src/ui/adapters/api-client.ts
 import axios from "axios";
@@ -405,11 +489,30 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-// Example helper to add context (trust, auth) per request
+// Add context and error handling
 api.interceptors.request.use((config) => {
-  // Attach any context headers here using res.locals.ctx passed from server route
+  // Attach trust context and auth headers
+  if (config.ctx) {
+    config.headers['X-Trust-Context'] = config.ctx.trust;
+    config.headers['Authorization'] = `Bearer ${config.ctx.token}`;
+  }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 429 rate limits gracefully
+    if (error.response?.status === 429) {
+      return Promise.reject({ 
+        code: 'RATE_LIMIT', 
+        message: 'Please wait and try again',
+        retryAfter: error.response.headers['retry-after'] 
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 ```
 
 ---

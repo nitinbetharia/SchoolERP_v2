@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= locals.trust?.theme || 'default' %>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="<%= locals.description || 'School ERP System' %>">
+    <title><%= title || 'School ERP' %> | <%= locals.trust?.name || 'School Management' %></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/app.css">
+    
+    <!-- Tenant-specific theme -->
+    <% if (locals.trust?.theme_css) { %>
+        <style><%= locals.trust.theme_css %></style>
+    <% } %>
+    
+    <!-- Page-specific styles -->
+    <% if (locals.pageStyles) { %>
+        <% locals.pageStyles.forEach(style => { %>
+            <link rel="stylesheet" href="<%= style %>">
+        <% }); %>
+    <% } %>
+</head>
+<body class="min-h-screen bg-tenant-bg text-tenant-text font-sans">
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+                <div class="flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-tenant-primary"></div>
+                    <span class="text-lg font-medium">Processing...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-tenant-primary text-white px-4 py-2 rounded-md z-50">
+        Skip to main content
+    </a>
+
+    <!-- Navigation -->
+    <% if (!locals.hideNavigation) { %>
+        <%- include('../partials/navbar') %>
+    <% } %>
+
+    <!-- Breadcrumbs -->
+    <% if (locals.breadcrumbs && locals.breadcrumbs.length > 0) { %>
+        <%- include('../partials/breadcrumbs') %>
+    <% } %>
+
+    <!-- Main Content -->
+    <main id="main-content" class="<%= locals.containerClass || 'container mx-auto px-4 py-8 max-w-7xl' %>" role="main">
+        <!-- Flash Messages -->
+        <% if (locals.flash) { %>
+            <%- include('../partials/alerts', { flash: locals.flash }) %>
+        <% } %>
+
+        <!-- Page Header -->
+        <% if (locals.pageHeader) { %>
+            <header class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900"><%= locals.pageHeader.title %></h1>
+                        <% if (locals.pageHeader.description) { %>
+                            <p class="mt-2 text-lg text-gray-600"><%= locals.pageHeader.description %></p>
+                        <% } %>
+                    </div>
+                    <% if (locals.pageHeader.actions) { %>
+                        <div class="flex space-x-3">
+                            <% locals.pageHeader.actions.forEach(action => { %>
+                                <a href="<%= action.href %>" 
+                                   class="<%= action.class || 'btn-primary' %>"
+                                   <% if (action.confirm) { %>onclick="return confirm('<%= action.confirm %>')"<% } %>>
+                                    <% if (action.icon) { %>
+                                        <span class="<%= action.icon %> mr-2"></span>
+                                    <% } %>
+                                    <%= action.label %>
+                                </a>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                </div>
+            </header>
+        <% } %>
+
+        <!-- Page Content -->
+        <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <% if (!locals.hideFooter) { %>
+        <%- include('../partials/footer') %>
+    <% } %>
+
+    <!-- Scripts -->
+    <script src="/js/main.js"></script>
+    
+    <!-- Chart.js for dashboards -->
+    <% if (locals.includeCharts) { %>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <% } %>
+    
+    <!-- Page-specific scripts -->
+    <% if (locals.pageScripts) { %>
+        <% locals.pageScripts.forEach(script => { %>
+            <script src="<%= script %>"></script>
+        <% }); %>
+    <% } %>
+
+    <!-- Inline scripts -->
+    <% if (locals.inlineScript) { %>
+        <script><%= locals.inlineScript %></script>
+    <% } %>
+
+    <!-- Error tracking (only in production) -->
+    <% if (process.env.NODE_ENV === 'production' && locals.trust?.error_tracking_key) { %>
+        <script>
+            window.addEventListener('error', function(e) {
+                // Send error to tracking service
+                fetch('/api/v1/errors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: e.message,
+                        filename: e.filename,
+                        lineno: e.lineno,
+                        colno: e.colno,
+                        stack: e.error?.stack,
+                        url: window.location.href,
+                        userAgent: navigator.userAgent
+                    })
+                });
+            });
+        </script>
+    <% } %>
+</body>
+</html>

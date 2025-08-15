@@ -1,0 +1,220 @@
+<!-- Navigation Bar - RBAC-based dynamic menu -->
+<nav class="bg-white border-b border-gray-200 shadow-sm" role="navigation" aria-label="Main navigation">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <!-- Logo and main navigation -->
+            <div class="flex items-center">
+                <!-- Logo/Brand -->
+                <div class="flex-shrink-0">
+                    <a href="/" class="flex items-center">
+                        <% if (locals.trust?.logo) { %>
+                            <img class="h-8 w-8" src="<%= locals.trust.logo %>" alt="<%= locals.trust.name %> Logo">
+                        <% } else { %>
+                            <div class="h-8 w-8 bg-tenant-primary rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">ERP</span>
+                            </div>
+                        <% } %>
+                        <span class="ml-3 text-xl font-semibold text-gray-900 hidden sm:block">
+                            <%= locals.trust?.name || 'School ERP' %>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Main navigation menu -->
+                <div class="hidden md:ml-8 md:flex md:space-x-8">
+                    <!-- Dashboard -->
+                    <% if (locals.perms?.dashboard?.view) { %>
+                        <a href="/dashboard" 
+                           class="<%= locals.currentPath === '/dashboard' ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200"
+                           aria-current="<%= locals.currentPath === '/dashboard' ? 'page' : 'false' %>">
+                            Dashboard
+                        </a>
+                    <% } %>
+
+                    <!-- System Management -->
+                    <% if (locals.perms?.data?.view) { %>
+                        <a href="/system" 
+                           class="<%= locals.currentPath?.startsWith('/system') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            System
+                        </a>
+                    <% } %>
+
+                    <!-- Setup -->
+                    <% if (locals.perms?.setup?.view) { %>
+                        <div class="relative group">
+                            <a href="/setup" 
+                               class="<%= locals.currentPath?.startsWith('/setup') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                                Setup
+                                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </a>
+                            <!-- Setup dropdown -->
+                            <div class="absolute z-50 left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div class="py-1">
+                                    <a href="/setup/trust-setup" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trust Setup</a>
+                                    <a href="/setup/school-onboarding" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Add School</a>
+                                    <a href="/setup/fee-structure" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Fee Structure</a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <!-- Users -->
+                    <% if (locals.perms?.user?.view) { %>
+                        <a href="/users" 
+                           class="<%= locals.currentPath?.startsWith('/users') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Users
+                        </a>
+                    <% } %>
+
+                    <!-- Students -->
+                    <% if (locals.perms?.student?.view) { %>
+                        <a href="/students" 
+                           class="<%= locals.currentPath?.startsWith('/students') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Students
+                        </a>
+                    <% } %>
+
+                    <!-- Fees -->
+                    <% if (locals.perms?.fees?.view) { %>
+                        <a href="/fees" 
+                           class="<%= locals.currentPath?.startsWith('/fees') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Fees
+                        </a>
+                    <% } %>
+
+                    <!-- Attendance -->
+                    <% if (locals.perms?.attendance?.view) { %>
+                        <a href="/attendance" 
+                           class="<%= locals.currentPath?.startsWith('/attendance') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Attendance
+                        </a>
+                    <% } %>
+
+                    <!-- Reports -->
+                    <% if (locals.perms?.reports?.view) { %>
+                        <a href="/reports" 
+                           class="<%= locals.currentPath?.startsWith('/reports') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Reports
+                        </a>
+                    <% } %>
+
+                    <!-- Communication -->
+                    <% if (locals.perms?.communication?.view) { %>
+                        <a href="/communication" 
+                           class="<%= locals.currentPath?.startsWith('/communication') ? 'border-tenant-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Communication
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Right side items -->
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <% if (locals.user) { %>
+                    <div class="relative">
+                        <button type="button" class="p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tenant-primary rounded-md" id="notifications-button" aria-expanded="false" aria-haspopup="true">
+                            <span class="sr-only">View notifications</span>
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12V7a4 4 0 00-4-4H7a4 4 0 00-4 4v5H1"></path>
+                            </svg>
+                            <% if (locals.notificationCount > 0) { %>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    <%= locals.notificationCount %>
+                                </span>
+                            <% } %>
+                        </button>
+                    </div>
+                <% } %>
+
+                <!-- User menu -->
+                <% if (locals.user) { %>
+                    <div class="relative group">
+                        <button type="button" class="flex items-center max-w-xs bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tenant-primary" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                            <span class="sr-only">Open user menu</span>
+                            <div class="h-8 w-8 rounded-full bg-tenant-primary flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">
+                                    <%= locals.user.first_name.charAt(0).toUpperCase() %><%= locals.user.last_name.charAt(0).toUpperCase() %>
+                                </span>
+                            </div>
+                            <div class="ml-3 hidden sm:block">
+                                <div class="text-sm font-medium text-gray-700">
+                                    <%= locals.user.first_name %> <%= locals.user.last_name %>
+                                </div>
+                                <div class="text-xs text-gray-500"><%= locals.user.role %></div>
+                            </div>
+                            <svg class="ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        
+                        <!-- User dropdown -->
+                        <div class="absolute right-0 z-50 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="py-1">
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                                <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                <div class="border-t border-gray-100"></div>
+                                <a href="/auth/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <!-- Guest user -->
+                    <div class="flex items-center space-x-4">
+                        <a href="/auth/login" class="text-gray-500 hover:text-gray-700 text-sm font-medium">Sign in</a>
+                        <a href="/auth/register" class="btn-primary">Get Started</a>
+                    </div>
+                <% } %>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-tenant-primary" id="mobile-menu-button" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6 block" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="menu-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="close-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="md:hidden hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 border-t border-gray-200">
+            <% if (locals.perms?.dashboard?.view) { %>
+                <a href="/dashboard" class="<%= locals.currentPath === '/dashboard' ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+            <% } %>
+            <% if (locals.perms?.data?.view) { %>
+                <a href="/system" class="<%= locals.currentPath?.startsWith('/system') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">System</a>
+            <% } %>
+            <% if (locals.perms?.setup?.view) { %>
+                <a href="/setup" class="<%= locals.currentPath?.startsWith('/setup') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Setup</a>
+            <% } %>
+            <% if (locals.perms?.user?.view) { %>
+                <a href="/users" class="<%= locals.currentPath?.startsWith('/users') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Users</a>
+            <% } %>
+            <% if (locals.perms?.student?.view) { %>
+                <a href="/students" class="<%= locals.currentPath?.startsWith('/students') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Students</a>
+            <% } %>
+            <% if (locals.perms?.fees?.view) { %>
+                <a href="/fees" class="<%= locals.currentPath?.startsWith('/fees') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Fees</a>
+            <% } %>
+            <% if (locals.perms?.attendance?.view) { %>
+                <a href="/attendance" class="<%= locals.currentPath?.startsWith('/attendance') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Attendance</a>
+            <% } %>
+            <% if (locals.perms?.reports?.view) { %>
+                <a href="/reports" class="<%= locals.currentPath?.startsWith('/reports') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Reports</a>
+            <% } %>
+            <% if (locals.perms?.communication?.view) { %>
+                <a href="/communication" class="<%= locals.currentPath?.startsWith('/communication') ? 'bg-tenant-primary text-white' : 'text-gray-600 hover:bg-gray-200' %> block px-3 py-2 rounded-md text-base font-medium">Communication</a>
+            <% } %>
+        </div>
+    </div>
+</nav>

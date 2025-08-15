@@ -1,0 +1,203 @@
+<!-- Reusable Button Component - Fully Responsive -->
+<%
+  // Default values
+  const buttonId = locals.id || 'btn-' + Math.random().toString(36).substr(2, 9);
+  const buttonType = locals.type || 'button';
+  const buttonText = locals.text || 'Button';
+  const buttonClass = locals.class || 'btn-primary';
+  const buttonSize = locals.size || 'md';
+  const isDisabled = locals.disabled || false;
+  const isLoading = locals.loading || false;
+  const icon = locals.icon || '';
+  const iconPosition = locals.iconPosition || 'left';
+  const ariaLabel = locals.ariaLabel || '';
+  const onclick = locals.onclick || '';
+  const href = locals.href || '';
+  const target = locals.target || '';
+  const fullWidth = locals.fullWidth || false;
+  const variant = locals.variant || 'primary';
+%>
+
+<%
+  // Base button classes with responsive design
+  let baseClasses = `
+    inline-flex items-center justify-center
+    font-medium rounded-lg
+    focus:outline-none focus:ring-2 focus:ring-offset-2
+    transition-all duration-200 ease-in-out
+    active:transform active:scale-95
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+  `;
+
+  // Size classes - mobile-first responsive
+  const sizeClasses = {
+    'xs': 'px-2 py-1 text-xs sm:px-2.5 sm:py-1.5',
+    'sm': 'px-3 py-1.5 text-sm sm:px-4 sm:py-2',
+    'md': 'px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base',
+    'lg': 'px-6 py-3 text-base sm:px-8 sm:py-4 sm:text-lg',
+    'xl': 'px-8 py-4 text-lg sm:px-10 sm:py-5 sm:text-xl'
+  };
+
+  // Variant classes
+  const variantClasses = {
+    'primary': 'bg-tenant-primary text-white hover:bg-opacity-90 focus:ring-tenant-primary border-transparent shadow-sm',
+    'secondary': 'bg-tenant-secondary text-white hover:bg-opacity-90 focus:ring-tenant-secondary border-transparent shadow-sm',
+    'outline': 'bg-white text-tenant-primary border border-tenant-primary hover:bg-tenant-primary hover:text-white focus:ring-tenant-primary',
+    'outline-secondary': 'bg-white text-tenant-secondary border border-tenant-secondary hover:bg-tenant-secondary hover:text-white focus:ring-tenant-secondary',
+    'ghost': 'bg-transparent text-tenant-primary hover:bg-tenant-primary hover:bg-opacity-10 focus:ring-tenant-primary border-transparent',
+    'danger': 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border-transparent shadow-sm',
+    'danger-outline': 'bg-white text-red-600 border border-red-600 hover:bg-red-600 hover:text-white focus:ring-red-500',
+    'success': 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 border-transparent shadow-sm',
+    'warning': 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500 border-transparent shadow-sm',
+    'gray': 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 border-transparent shadow-sm',
+    'light': 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 border border-gray-300'
+  };
+
+  // Full width classes
+  const widthClasses = fullWidth ? 'w-full' : '';
+
+  // Combine all classes
+  const finalClasses = `
+    ${baseClasses}
+    ${sizeClasses[buttonSize] || sizeClasses.md}
+    ${variantClasses[variant] || variantClasses.primary}
+    ${widthClasses}
+    ${buttonClass}
+  `.trim().replace(/\s+/g, ' ');
+%>
+
+<% if (href) { %>
+  <!-- Render as link -->
+  <a 
+    id="<%= buttonId %>"
+    href="<%= href %>"
+    <% if (target) { %>target="<%= target %>"<% } %>
+    <% if (ariaLabel) { %>aria-label="<%= ariaLabel %>"<% } %>
+    <% if (onclick) { %>onclick="<%= onclick %>"<% } %>
+    class="<%= finalClasses %>"
+    <% if (isDisabled) { %>aria-disabled="true" tabindex="-1"<% } %>
+  >
+    <!-- Loading spinner -->
+    <% if (isLoading) { %>
+      <svg class="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    <% } %>
+
+    <!-- Left icon -->
+    <% if (icon && iconPosition === 'left' && !isLoading) { %>
+      <svg class="-ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+        <%- icon %>
+      </svg>
+    <% } %>
+
+    <!-- Button text -->
+    <span class="<%= isLoading ? 'opacity-75' : '' %>">
+      <%= isLoading ? 'Processing...' : buttonText %>
+    </span>
+
+    <!-- Right icon -->
+    <% if (icon && iconPosition === 'right' && !isLoading) { %>
+      <svg class="ml-2 sm:ml-3 -mr-1 h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+        <%- icon %>
+      </svg>
+    <% } %>
+  </a>
+<% } else { %>
+  <!-- Render as button -->
+  <button 
+    type="<%= buttonType %>"
+    id="<%= buttonId %>"
+    <% if (ariaLabel) { %>aria-label="<%= ariaLabel %>"<% } %>
+    <% if (onclick) { %>onclick="<%= onclick %>"<% } %>
+    class="<%= finalClasses %>"
+    <% if (isDisabled || isLoading) { %>disabled<% } %>
+  >
+    <!-- Loading spinner -->
+    <% if (isLoading) { %>
+      <svg class="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    <% } %>
+
+    <!-- Left icon -->
+    <% if (icon && iconPosition === 'left' && !isLoading) { %>
+      <svg class="-ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+        <%- icon %>
+      </svg>
+    <% } %>
+
+    <!-- Button text -->
+    <span class="<%= isLoading ? 'opacity-75' : '' %>">
+      <%= isLoading ? 'Processing...' : buttonText %>
+    </span>
+
+    <!-- Right icon -->
+    <% if (icon && iconPosition === 'right' && !isLoading) { %>
+      <svg class="ml-2 sm:ml-3 -mr-1 h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+        <%- icon %>
+      </svg>
+    <% } %>
+  </button>
+<% } %>
+
+<!-- Add ripple effect for enhanced UX on touch devices -->
+<style>
+  #<%= buttonId %> {
+    position: relative;
+    overflow: hidden;
+  }
+
+  #<%= buttonId %>:not(:disabled):active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    animation: ripple 0.6s ease-out;
+  }
+
+  @keyframes ripple {
+    to {
+      width: 200px;
+      height: 200px;
+      opacity: 0;
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    #<%= buttonId %> {
+      /* Increase tap target size on touch devices */
+      min-height: 44px;
+    }
+    
+    #<%= buttonId %>:not(:disabled):active {
+      transform: scale(0.98);
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    #<%= buttonId %> {
+      border: 2px solid;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    #<%= buttonId %> {
+      transition: none;
+    }
+    
+    #<%= buttonId %>:not(:disabled):active {
+      transform: none;
+    }
+  }
+</style>

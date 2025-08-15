@@ -1,0 +1,223 @@
+<!-- Wizard Navigation & Progress - Reusable for all wizards -->
+<% if (locals.wizard) { %>
+    <nav class="mb-8" aria-label="Wizard navigation">
+        <!-- Wizard header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900"><%= wizard.config.name %></h1>
+            <p class="mt-1 text-sm text-gray-600"><%= wizard.config.description %></p>
+            
+            <!-- Progress bar -->
+            <div class="mt-4">
+                <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                    <span>Progress</span>
+                    <span><%= wizard.progress %>% Complete</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-tenant-primary h-2 rounded-full transition-all duration-300" 
+                         style="width: <%= wizard.progress %>%"
+                         role="progressbar" 
+                         aria-valuenow="<%= wizard.progress %>" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step indicators -->
+        <div class="flex items-center justify-center">
+            <ol class="flex items-center w-full max-w-4xl">
+                <% wizard.config.steps.forEach((step, index) => { %>
+                    <li class="flex items-center <%= index < wizard.config.steps.length - 1 ? 'flex-1' : '' %>">
+                        <!-- Step circle -->
+                        <div class="flex items-center">
+                            <% 
+                                const isCompleted = wizardHelpers.isStepCompleted(step.id);
+                                const isCurrent = step.id === wizard.currentStep.id;
+                                const isAccessible = wizardHelpers.isStepAccessible(step.id);
+                                const stepNumber = wizardHelpers.getStepNumber(step.id);
+                            %>
+                            
+                            <% if (isAccessible) { %>
+                                <a href="/setup/<%= wizard.config.id %>/<%= step.id %>" 
+                                   class="flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-medium transition-colors duration-200
+                                          <% if (isCompleted) { %>
+                                              bg-tenant-primary border-tenant-primary text-white hover:bg-tenant-secondary
+                                          <% } else if (isCurrent) { %>
+                                              border-tenant-primary text-tenant-primary bg-white
+                                          <% } else { %>
+                                              border-gray-300 text-gray-500 hover:border-gray-400 bg-white
+                                          <% } %>"
+                                   aria-current="<%= isCurrent ? 'step' : 'false' %>"
+                                   aria-label="Step <%= stepNumber %>: <%= step.title %>">
+                                    <% if (isCompleted) { %>
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                    <% } else { %>
+                                        <%= stepNumber %>
+                                    <% } %>
+                                </a>
+                            <% } else { %>
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-200 text-sm font-medium text-gray-400 bg-gray-50"
+                                     aria-label="Step <%= stepNumber %>: <%= step.title %> (not accessible)">
+                                    <%= stepNumber %>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Step title (below circle on mobile, beside on desktop) -->
+                        <div class="ml-3 hidden sm:block">
+                            <p class="text-sm font-medium <%= isCurrent ? 'text-tenant-primary' : isCompleted ? 'text-gray-900' : 'text-gray-500' %>">
+                                <%= step.title %>
+                            </p>
+                            <% if (step.description && isCurrent) { %>
+                                <p class="text-xs text-gray-500 mt-1"><%= step.description %></p>
+                            <% } %>
+                        </div>
+
+                        <!-- Connecting line -->
+                        <% if (index < wizard.config.steps.length - 1) { %>
+                            <div class="flex-1 h-px bg-gray-200 mx-4 hidden sm:block"></div>
+                        <% } %>
+                    </li>
+                <% }); %>
+            </ol>
+        </div>
+
+        <!-- Mobile step titles (below indicators) -->
+        <div class="mt-4 sm:hidden">
+            <% wizard.config.steps.forEach((step, index) => { %>
+                <% 
+                    const isCurrent = step.id === wizard.currentStep.id;
+                    const stepNumber = wizardHelpers.getStepNumber(step.id);
+                %>
+                <% if (isCurrent) { %>
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-tenant-primary">
+                            Step <%= stepNumber %>: <%= step.title %>
+                        </p>
+                        <% if (step.description) { %>
+                            <p class="text-xs text-gray-500 mt-1"><%= step.description %></p>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% }); %>
+        </div>
+
+        <!-- Wizard controls -->
+        <div class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+            <!-- Save and exit -->
+            <div>
+                <% if (wizard.config.saveProgress) { %>
+                    <button type="button" 
+                            class="text-sm text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tenant-primary rounded-md px-2 py-1"
+                            onclick="saveAndExit()">
+                        Save & Exit
+                    </button>
+                <% } %>
+                
+                <% if (wizard.config.restartable && wizard.session.completedSteps.length > 0) { %>
+                    <button type="button" 
+                            class="ml-4 text-sm text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 rounded-md px-2 py-1"
+                            onclick="confirmRestart()"
+                            aria-describedby="restart-warning">
+                        Restart Wizard
+                    </button>
+                    <span id="restart-warning" class="sr-only">This will clear all progress</span>
+                <% } %>
+            </div>
+
+            <!-- Time remaining (if wizard has timeout) -->
+            <% if (wizard.config.timeoutMinutes) { %>
+                <div class="text-sm text-gray-500">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span id="time-remaining">Calculating...</span>
+                </div>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- JavaScript for wizard functionality -->
+    <script>
+        // Save and exit functionality
+        function saveAndExit() {
+            if (confirm('Save your progress and exit the wizard?')) {
+                window.location.href = '/dashboard';
+            }
+        }
+
+        // Restart wizard functionality
+        function confirmRestart() {
+            if (confirm('Are you sure you want to restart the wizard? This will clear all your progress.')) {
+                fetch('/setup/<%= wizard.config.id %>/restart', { method: 'POST' })
+                    .then(() => window.location.reload())
+                    .catch(err => alert('Error restarting wizard: ' + err.message));
+            }
+        }
+
+        // Time remaining calculation
+        <% if (wizard.config.timeoutMinutes) { %>
+            const startedAt = new Date('<%= wizard.session.startedAt %>');
+            const timeoutMinutes = <%= wizard.config.timeoutMinutes %>;
+            const lastActivity = new Date('<%= wizard.session.lastActivity %>');
+            
+            function updateTimeRemaining() {
+                const now = new Date();
+                const elapsedMinutes = (now - lastActivity) / (1000 * 60);
+                const remainingMinutes = Math.max(0, timeoutMinutes - elapsedMinutes);
+                
+                const hours = Math.floor(remainingMinutes / 60);
+                const minutes = Math.floor(remainingMinutes % 60);
+                
+                const timeEl = document.getElementById('time-remaining');
+                if (remainingMinutes <= 0) {
+                    timeEl.textContent = 'Session expired';
+                    timeEl.className = 'text-red-600 font-medium';
+                } else if (remainingMinutes < 5) {
+                    timeEl.textContent = `${minutes}m remaining`;
+                    timeEl.className = 'text-red-600 font-medium';
+                } else {
+                    timeEl.textContent = hours > 0 ? `${hours}h ${minutes}m remaining` : `${minutes}m remaining`;
+                }
+            }
+            
+            updateTimeRemaining();
+            setInterval(updateTimeRemaining, 30000); // Update every 30 seconds
+        <% } %>
+
+        // Auto-save form data periodically
+        <% if (wizard.config.saveProgress) { %>
+            let autoSaveInterval;
+            function startAutoSave() {
+                autoSaveInterval = setInterval(() => {
+                    const form = document.querySelector('form[data-wizard-form]');
+                    if (form) {
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData.entries());
+                        
+                        fetch(`/setup/<%= wizard.config.id %>/<%= wizard.currentStep.id %>/auto-save`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        }).catch(() => {}); // Silent fail for auto-save
+                    }
+                }, 30000); // Auto-save every 30 seconds
+            }
+            
+            function stopAutoSave() {
+                if (autoSaveInterval) {
+                    clearInterval(autoSaveInterval);
+                }
+            }
+            
+            // Start auto-save when page loads
+            document.addEventListener('DOMContentLoaded', startAutoSave);
+            
+            // Stop auto-save when leaving page
+            window.addEventListener('beforeunload', stopAutoSave);
+        <% } %>
+    </script>
+<% } %>

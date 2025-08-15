@@ -1,0 +1,204 @@
+<!-- Flash Messages & Alerts - Reusable component -->
+<% if (flash && (flash.error || flash.success || flash.info || flash.warning)) { %>
+    <div class="mb-6 space-y-4" role="alert">
+        <!-- Error Messages -->
+        <% if (flash.error) { %>
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 animate-fade-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-semibold text-red-800">
+                            <% if (flash.error.code) { %>
+                                Error: <%= flash.error.code %>
+                            <% } else { %>
+                                Error
+                            <% } %>
+                        </h3>
+                        <div class="mt-1">
+                            <p class="text-sm text-red-700"><%= flash.error.message %></p>
+                            <% if (flash.error.details && flash.error.details.length > 0) { %>
+                                <ul class="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                                    <% if (Array.isArray(flash.error.details)) { %>
+                                        <% flash.error.details.forEach(detail => { %>
+                                            <li>
+                                                <% if (typeof detail === 'object' && detail.path && detail.message) { %>
+                                                    <strong><%= detail.path %>:</strong> <%= detail.message %>
+                                                <% } else { %>
+                                                    <%= detail %>
+                                                <% } %>
+                                            </li>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <li><%= flash.error.details %></li>
+                                    <% } %>
+                                </ul>
+                            <% } %>
+                        </div>
+                        <% if (flash.error.traceId) { %>
+                            <div class="mt-2">
+                                <span class="text-xs text-red-600">Trace ID: <%= flash.error.traceId %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button type="button" class="inline-flex text-red-400 hover:text-red-600 focus:outline-none focus:text-red-600" onclick="this.parentElement.parentElement.parentElement.style.display='none'">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Success Messages -->
+        <% if (flash.success) { %>
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 animate-fade-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-semibold text-green-800">Success</h3>
+                        <div class="mt-1">
+                            <p class="text-sm text-green-700">
+                                <% if (typeof flash.success === 'string') { %>
+                                    <%= flash.success %>
+                                <% } else { %>
+                                    <%= flash.success.message %>
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button type="button" class="inline-flex text-green-400 hover:text-green-600 focus:outline-none focus:text-green-600" onclick="this.parentElement.parentElement.parentElement.style.display='none'">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Warning Messages -->
+        <% if (flash.warning) { %>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 animate-fade-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-semibold text-yellow-800">Warning</h3>
+                        <div class="mt-1">
+                            <p class="text-sm text-yellow-700">
+                                <% if (typeof flash.warning === 'string') { %>
+                                    <%= flash.warning %>
+                                <% } else { %>
+                                    <%= flash.warning.message %>
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button type="button" class="inline-flex text-yellow-400 hover:text-yellow-600 focus:outline-none focus:text-yellow-600" onclick="this.parentElement.parentElement.parentElement.style.display='none'">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Info Messages -->
+        <% if (flash.info) { %>
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 animate-fade-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-semibold text-blue-800">Information</h3>
+                        <div class="mt-1">
+                            <p class="text-sm text-blue-700">
+                                <% if (typeof flash.info === 'string') { %>
+                                    <%= flash.info %>
+                                <% } else { %>
+                                    <%= flash.info.message %>
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button type="button" class="inline-flex text-blue-400 hover:text-blue-600 focus:outline-none focus:text-blue-600" onclick="this.parentElement.parentElement.parentElement.style.display='none'">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+<% } %>
+
+<!-- Rate limit specific alert -->
+<% if (flash && flash.error && flash.error.code === 'RATE_LIMIT') { %>
+    <div class="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4" role="alert">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-semibold text-orange-800">Rate Limited</h3>
+                <div class="mt-1 text-sm text-orange-700">
+                    <p><%= flash.error.message %></p>
+                    <% if (flash.error.retryAfter) { %>
+                        <p class="mt-1">Please wait <span id="retry-countdown"><%= flash.error.retryAfter %></span> seconds before trying again.</p>
+                        <script>
+                            let countdown = parseInt('<%= flash.error.retryAfter %>');
+                            const countdownEl = document.getElementById('retry-countdown');
+                            const timer = setInterval(() => {
+                                countdown--;
+                                countdownEl.textContent = countdown;
+                                if (countdown <= 0) {
+                                    clearInterval(timer);
+                                    countdownEl.parentElement.innerHTML = 'You can try again now.';
+                                }
+                            }, 1000);
+                        </script>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<!-- Auto-hide success messages after 5 seconds -->
+<script>
+    setTimeout(() => {
+        const successAlerts = document.querySelectorAll('.bg-green-50');
+        successAlerts.forEach(alert => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => alert.style.display = 'none', 500);
+        });
+    }, 5000);
+</script>

@@ -1,0 +1,160 @@
+<!-- 404 Error Page - Fully Responsive -->
+<% layout('../layouts/base') %>
+
+<!-- Main error container -->
+<div class="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mt-16">
+    <!-- Error illustration -->
+    <div class="max-w-md w-full text-center">
+        <!-- 404 Graphic -->
+        <div class="mb-8">
+            <svg class="mx-auto h-32 w-32 sm:h-40 sm:w-40 text-tenant-primary opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+        </div>
+
+        <!-- Error code -->
+        <h1 class="text-6xl sm:text-8xl font-bold text-tenant-primary mb-4">
+            404
+        </h1>
+
+        <!-- Error title -->
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+            Page Not Found
+        </h2>
+
+        <!-- Error description -->
+        <p class="text-base sm:text-lg text-gray-600 mb-8 leading-relaxed">
+            The page you're looking for doesn't exist or has been moved.
+            <span class="hidden sm:inline">This might happen when a link is outdated or there's a typo in the URL.</span>
+        </p>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+            <!-- Go back button -->
+            <%- include('../partials/form-controls/button', {
+                type: 'button',
+                text: 'Go Back',
+                variant: 'outline',
+                size: 'lg',
+                onclick: 'history.back()',
+                icon: '<path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />',
+                iconPosition: 'left',
+                class: 'w-full sm:w-auto'
+            }) %>
+
+            <!-- Home button -->
+            <%- include('../partials/form-controls/button', {
+                href: '/',
+                text: 'Go Home',
+                variant: 'primary',
+                size: 'lg',
+                icon: '<path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />',
+                iconPosition: 'left',
+                class: 'w-full sm:w-auto'
+            }) %>
+        </div>
+
+        <!-- Helpful links -->
+        <div class="mt-12 pt-8 border-t border-gray-200">
+            <p class="text-sm text-gray-500 mb-4">Looking for something specific?</p>
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-6 justify-center text-sm">
+                <% if (locals.perms?.dashboard?.view) { %>
+                    <a href="/dashboard" class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200">Dashboard</a>
+                <% } %>
+                <% if (locals.perms?.student?.view) { %>
+                    <a href="/students" class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200">Students</a>
+                <% } %>
+                <% if (locals.perms?.fees?.view) { %>
+                    <a href="/fees" class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200">Fees</a>
+                <% } %>
+                <% if (locals.perms?.reports?.view) { %>
+                    <a href="/reports" class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200">Reports</a>
+                <% } %>
+                <a href="/help" class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200">Help</a>
+            </div>
+        </div>
+
+        <!-- Contact support -->
+        <% if (locals.trust?.settings?.support_email || locals.trust?.settings?.support_phone) { %>
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm text-gray-600 mb-2">Still can't find what you're looking for?</p>
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center text-sm">
+                    <% if (locals.trust.settings.support_email) { %>
+                        <a href="mailto:<%= locals.trust.settings.support_email %>" 
+                           class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200 flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                            </svg>
+                            Email Support
+                        </a>
+                    <% } %>
+                    
+                    <% if (locals.trust.settings.support_phone) { %>
+                        <a href="tel:<%= locals.trust.settings.support_phone %>" 
+                           class="text-tenant-primary hover:text-tenant-secondary transition-colors duration-200 flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                            </svg>
+                            Call Support
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Error tracking -->
+<script>
+    // Track 404 errors for analytics (production only)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'exception', {
+            'description': '404_page_not_found',
+            'fatal': false,
+            'page_title': document.title,
+            'page_location': window.location.href
+        });
+    }
+
+    // Report 404 to backend for monitoring
+    if (navigator.sendBeacon && window.location.pathname !== '/favicon.ico') {
+        const data = JSON.stringify({
+            type: '404_error',
+            url: window.location.href,
+            referrer: document.referrer,
+            user_agent: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+            trust: '<%= locals.trust?.slug %>'
+        });
+        
+        navigator.sendBeacon('/api/v1/errors/404', data);
+    }
+
+    // Enhanced back button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if we can go back in history
+        if (history.length <= 1 || document.referrer === '') {
+            const backButton = document.querySelector('button[onclick="history.back()"]');
+            if (backButton) {
+                backButton.style.display = 'none';
+            }
+        }
+    });
+</script>
+
+<!-- Structured data for search engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "404 - Page Not Found",
+  "description": "The requested page could not be found",
+  "url": "<%= locals.currentUrl %>",
+  "mainEntity": {
+    "@type": "Thing",
+    "name": "404 Error",
+    "description": "The requested page does not exist"
+  }
+}
+</script>
