@@ -1,0 +1,32 @@
+{
+  "system": {
+    "users": [
+      {
+        "email": "sysadmin@example.com",
+        "role": "SYSTEM_ADMIN",
+        "password": "ChangeMe!234"
+      }
+    ],
+    "config": [
+      {
+        "config_key": "password.policy.minLength",
+        "config_value": "10",
+        "config_type": "NUMBER"
+      }
+    ]
+  },
+  "trust": {
+    "roles": [
+      "TRUST_ADMIN",
+      "SCHOOL_ADMIN",
+      "TEACHER",
+      "ACCOUNTANT",
+      "PARENT",
+      "STUDENT"
+    ],
+    "fee_heads": [
+      "Tuition",
+      "Transport"
+    ]
+  }
+}

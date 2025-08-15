@@ -1,0 +1,11 @@
+<% if (pageCount && pageCount > 1) { %>
+  <div class="flex items-center justify-between mt-4">
+    <div>Page <%= page %> of <%= pageCount %></div>
+    <div class="flex gap-2">
+      <% for (let i=1;i<=pageCount;i++){ %>
+        <a href="?page=<%= i %>&limit=<%= limit %>"
+           class="px-3 py-1 rounded border <%= i===page ? 'bg-blue-600 text-white' : 'bg-white' %>"><%= i %></a>
+      <% } %>
+    </div>
+  </div>
+<% } %>

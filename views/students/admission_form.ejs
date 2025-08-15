@@ -1,0 +1,27 @@
+<% layout('layout') -%>
+<h1 class="text-2xl font-semibold mb-4">Student Admission</h1>
+<form method="POST" action="/students/admissions" class="bg-white p-4 rounded-lg shadow grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div>
+    <label class="block mb-1">First Name</label>
+    <input name="first_name" class="border rounded w-full px-3 py-2" required>
+  </div>
+  <div>
+    <label class="block mb-1">Last Name</label>
+    <input name="last_name" class="border rounded w-full px-3 py-2" required>
+  </div>
+  <div>
+    <label class="block mb-1">Date of Birth</label>
+    <input type="date" name="dob" class="border rounded w-full px-3 py-2" required>
+  </div>
+  <div>
+    <label class="block mb-1">Class</label>
+    <select name="class_id" class="border rounded w-full px-3 py-2" required>
+      <% (classes||[]).forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="md:col-span-2">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded">Admit Student</button>
+  </div>
+</form>

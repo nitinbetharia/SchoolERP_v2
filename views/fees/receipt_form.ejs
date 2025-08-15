@@ -1,0 +1,24 @@
+<% layout('layout') -%>
+<h1 class="text-2xl font-semibold mb-4">Collect Fees</h1>
+<form method="POST" action="/fees/receipts" class="bg-white p-4 rounded-lg shadow grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div>
+    <label class="block mb-1">Student ID</label>
+    <input name="student_id" type="number" class="border rounded w-full px-3 py-2" required>
+  </div>
+  <div>
+    <label class="block mb-1">Amount</label>
+    <input name="amount" type="number" step="0.01" class="border rounded w-full px-3 py-2" required>
+  </div>
+  <div>
+    <label class="block mb-1">Mode</label>
+    <select name="mode" class="border rounded w-full px-3 py-2" required>
+      <option>CASH</option>
+      <option>BANK</option>
+      <option>UPI</option>
+      <option>ONLINE</option>
+    </select>
+  </div>
+  <div class="md:col-span-2">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded">Post Receipt</button>
+  </div>
+</form>

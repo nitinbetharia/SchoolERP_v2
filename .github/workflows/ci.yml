@@ -1,0 +1,38 @@
+name: ci
+on: { push: { branches: [ main ] }, pull_request: { branches: [ main ] } }
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env: { MYSQL_ROOT_PASSWORD: root }
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci || npm i
+      - run: npx -y @redocly/cli lint api/openapi.yaml || true
+      - run: echo "No tests yet"  # Placeholder
+
+- name: Install dev deps
+  run: npm ci || npm i
+
+- name: Contract: generate skeleton cases
+  run: npx ts-node tests/contract/generate-cases.ts
+
+- name: Contract: run tests (non-blocking initially)
+  run: npm run test:contract
+
+- name: Verify tracker vs OpenAPI (blocking)
+  run: npx ts-node scripts/verify-tracker-openapi.ts
+
+- name: Contract: generate skeleton cases
+  run: npx ts-node tests/contract/generate-cases.ts
+
+- name: Contract: run tests (blocking)
+  run: npm run test:contract

@@ -1,0 +1,1202 @@
+openapi: 3.1.0
+info:
+  title: School ERP API — REST Grouped (All 66 Activities)
+  version: 1.0.0
+  description: >
+    REST-grouped endpoints mapped from the 66 activity tracker, preserving activity IDs via x-activity-id.
+  x-generated: 2025-08-13
+servers:
+  - url: https://{tenant}.example.com/api/v1
+    description: Tenant-scoped API
+tags:
+  - name: ATTD
+  - name: AUTH
+  - name: COMM
+  - name: DASH
+  - name: DATA
+  - name: FEES
+  - name: REPT
+  - name: SETUP
+  - name: STUD
+  - name: USER
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object }
+        traceId: { type: string }
+paths:
+  /attendance/bulk:
+
+post:
+  tags: [ATTD]
+  summary: "Daily attendance & bulk import"
+  operationId: attd_attd_06_001
+  x-activity-id: "ATTD-06-001"
+  x-db-entities: "attendance_daily, attendance_summary"
+  x-dependencies: "SETUP-01-004, STUD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /attendance/leaves:
+
+post:
+  tags: [ATTD]
+  summary: "Leave/absence workflows"
+  operationId: attd_attd_06_002
+  x-activity-id: "ATTD-06-002"
+  x-db-entities: "attendance_daily, trust_config"
+  x-dependencies: "ATTD-06-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /attendance/reports:
+
+get:
+  tags: [ATTD]
+  summary: "Attendance reporting/analytics"
+  operationId: attd_attd_06_003
+  x-activity-id: "ATTD-06-003"
+  x-db-entities: "attendance_summary"
+  x-dependencies: "ATTD-06-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /auth:
+
+post:
+  tags: [AUTH]
+  summary: "Local authentication (web sessions)"
+  operationId: auth_auth_02_001
+  x-activity-id: "AUTH-02-001"
+  x-db-entities: "users, sessions, audit_logs"
+  x-dependencies: "DATA-*, SETUP-01-007"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "JWT authentication (APIs)"
+  operationId: auth_auth_02_002
+  x-activity-id: "AUTH-02-002"
+  x-db-entities: "users, audit_logs"
+  x-dependencies: "AUTH-02-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "RBAC (roles & permissions)"
+  operationId: auth_auth_02_004
+  x-activity-id: "AUTH-02-004"
+  x-db-entities: "users, trust_config"
+  x-dependencies: "SETUP-01-007"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "Permission mapping"
+  operationId: auth_auth_02_005
+  x-activity-id: "AUTH-02-005"
+  x-db-entities: "trust_config"
+  x-dependencies: "AUTH-02-004"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "Account lockout"
+  operationId: auth_auth_02_006
+  x-activity-id: "AUTH-02-006"
+  x-db-entities: "users, audit_logs"
+  x-dependencies: "AUTH-02-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "Email/phone verification"
+  operationId: auth_auth_02_007
+  x-activity-id: "AUTH-02-007"
+  x-db-entities: "users, audit_logs"
+  x-dependencies: "AUTH-02-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "Auth event logging"
+  operationId: auth_auth_02_009
+  x-activity-id: "AUTH-02-009"
+  x-db-entities: "audit_logs, system_audit_logs"
+  x-dependencies: "AUTH-02-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [AUTH]
+  summary: "API keys/tokens"
+  operationId: auth_auth_02_010
+  x-activity-id: "AUTH-02-010"
+  x-db-entities: "trust_config, users"
+  x-dependencies: "AUTH-02-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /auth/mfa:
+
+post:
+  tags: [AUTH]
+  summary: "Multi-factor (OTP)"
+  operationId: auth_auth_02_003
+  x-activity-id: "AUTH-02-003"
+  x-db-entities: "users, audit_logs, trust_config"
+  x-dependencies: "AUTH-02-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /auth/password:
+
+post:
+  tags: [AUTH]
+  summary: "Password reset flows"
+  operationId: auth_auth_02_008
+  x-activity-id: "AUTH-02-008"
+  x-db-entities: "users, audit_logs, system_audit_logs"
+  x-dependencies: "AUTH-02-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /communications:
+
+post:
+  tags: [COMM]
+  summary: "Notifications (SMS/Email/WhatsApp)"
+  operationId: comm_comm_09_001
+  x-activity-id: "COMM-09-001"
+  x-db-entities: "communication_templates, communication_messages"
+  x-dependencies: "USER-*, STUD-*, FEES-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /communications/alerts:
+
+post:
+  tags: [COMM]
+  summary: "Emergency alerts (broadcast)"
+  operationId: comm_comm_09_003
+  x-activity-id: "COMM-09-003"
+  x-db-entities: "communication_templates, communication_campaigns, communication_messages"
+  x-dependencies: "USER-*, STUD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /communications/announcements:
+
+post:
+  tags: [COMM]
+  summary: "In-app announcements"
+  operationId: comm_comm_09_002
+  x-activity-id: "COMM-09-002"
+  x-db-entities: "communication_templates, communication_campaigns"
+  x-dependencies: "USER-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /dashboards:
+
+get:
+  tags: [DASH]
+  summary: "Trust admin dashboard"
+  operationId: dash_dash_08_001
+  x-activity-id: "DASH-08-001"
+  x-db-entities: "schools, users, fee_receipts, attendance_summary"
+  x-dependencies: "DATA-*, SETUP-*, FEES-*, ATTD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [DASH]
+  summary: "School admin dashboard"
+  operationId: dash_dash_08_002
+  x-activity-id: "DASH-08-002"
+  x-db-entities: "users, students, fee_receipts, attendance_summary"
+  x-dependencies: "SETUP-*, FEES-*, ATTD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [DASH]
+  summary: "Teacher dashboard"
+  operationId: dash_dash_08_003
+  x-activity-id: "DASH-08-003"
+  x-db-entities: "classes, sections, attendance_daily"
+  x-dependencies: "SETUP-*, ATTD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /fees:
+
+post:
+  tags: [FEES]
+  summary: "Class & student fee mapping"
+  operationId: fees_fees_05_002
+  x-activity-id: "FEES-05-002"
+  x-db-entities: "student_fee_assignments, fee_structures"
+  x-dependencies: "FEES-05-001, STUD-04-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [FEES]
+  summary: "Transport/optional services"
+  operationId: fees_fees_05_004
+  x-activity-id: "FEES-05-004"
+  x-db-entities: "trust_config, student_fee_assignments"
+  x-dependencies: "FEES-05-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [FEES]
+  summary: "Late fee rules (config/override)"
+  operationId: fees_fees_05_005
+  x-activity-id: "FEES-05-005"
+  x-db-entities: "trust_config, student_fee_assignments"
+  x-dependencies: "SETUP-01-006, FEES-05-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [FEES]
+  summary: "Payment gateway integration"
+  operationId: fees_fees_05_007
+  x-activity-id: "FEES-05-007"
+  x-db-entities: "payment_gateway_logs, fee_receipts"
+  x-dependencies: "FEES-05-006"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /fees/discounts:
+
+post:
+  tags: [FEES]
+  summary: "Discount allocation"
+  operationId: fees_fees_05_003
+  x-activity-id: "FEES-05-003"
+  x-db-entities: "student_fee_assignments, trust_config"
+  x-dependencies: "FEES-05-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /fees/receipts:
+
+post:
+  tags: [FEES]
+  summary: "Fee collection & receipts"
+  operationId: fees_fees_05_006
+  x-activity-id: "FEES-05-006"
+  x-db-entities: "fee_receipts, student_fee_assignments"
+  x-dependencies: "FEES-05-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /fees/refunds:
+
+post:
+  tags: [FEES]
+  summary: "Refunds & adjustments"
+  operationId: fees_fees_05_008
+  x-activity-id: "FEES-05-008"
+  x-db-entities: "fee_receipts"
+  x-dependencies: "FEES-05-006"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /fees/reports:
+
+get:
+  tags: [FEES]
+  summary: "Reports, reconciliation & defaulters"
+  operationId: fees_fees_05_009
+  x-activity-id: "FEES-05-009"
+  x-db-entities: "fee_receipts, student_fee_assignments"
+  x-dependencies: "FEES-05-006"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /fees/structures:
+
+post:
+  tags: [FEES]
+  summary: "Fee heads & structures"
+  operationId: fees_fees_05_001
+  x-activity-id: "FEES-05-001"
+  x-db-entities: "fee_heads, fee_structures, fee_installments"
+  x-dependencies: "SETUP-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /reports:
+
+get:
+  tags: [REPT]
+  summary: "Student profile reports"
+  operationId: rept_rept_07_001
+  x-activity-id: "REPT-07-001"
+  x-db-entities: "students, admissions"
+  x-dependencies: "STUD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [REPT]
+  summary: "Fee collection reports"
+  operationId: rept_rept_07_002
+  x-activity-id: "REPT-07-002"
+  x-db-entities: "fee_receipts, student_fee_assignments"
+  x-dependencies: "FEES-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [REPT]
+  summary: "Attendance summary reports"
+  operationId: rept_rept_07_003
+  x-activity-id: "REPT-07-003"
+  x-db-entities: "attendance_summary, students"
+  x-dependencies: "ATTD-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [REPT]
+  summary: "Academic performance reports"
+  operationId: rept_rept_07_004
+  x-activity-id: "REPT-07-004"
+  x-db-entities: "classes, sections, trust_config"
+  x-dependencies: "SETUP-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [REPT]
+  summary: "Custom report builder"
+  operationId: rept_rept_07_005
+  x-activity-id: "REPT-07-005"
+  x-db-entities: "reports, report_templates"
+  x-dependencies: "DATA-*, SETUP-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+get:
+  tags: [REPT]
+  summary: "Export to PDF/Excel"
+  operationId: rept_rept_07_006
+  x-activity-id: "REPT-07-006"
+  x-db-entities: "reports"
+  x-dependencies: "REPT-07-001, REPT-07-002, REPT-07-003"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /setup/academic-years:
+
+post:
+  tags: [SETUP]
+  summary: "Wizard: Academic year creation"
+  operationId: setup_setup_01_003
+  x-activity-id: "SETUP-01-003"
+  x-db-entities: "academic_years"
+  x-dependencies: "SETUP-01-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /setup/academics:
+
+post:
+  tags: [SETUP]
+  summary: "Subject & grading configuration"
+  operationId: setup_setup_01_005
+  x-activity-id: "SETUP-01-005"
+  x-db-entities: "classes, trust_config"
+  x-dependencies: "SETUP-01-004"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /setup/classes:
+
+post:
+  tags: [SETUP]
+  summary: "Class & section setup (+ House)"
+  operationId: setup_setup_01_004
+  x-activity-id: "SETUP-01-004"
+  x-db-entities: "classes, sections, houses"
+  x-dependencies: "SETUP-01-003"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /setup/roles:
+
+post:
+  tags: [SETUP]
+  summary: "Role seeding (admins)"
+  operationId: setup_setup_01_007
+  x-activity-id: "SETUP-01-007"
+  x-db-entities: "users, trust_config"
+  x-dependencies: "SETUP-01-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /setup/schools:
+
+post:
+  tags: [SETUP]
+  summary: "Wizard: School creation"
+  operationId: setup_setup_01_002
+  x-activity-id: "SETUP-01-002"
+  x-db-entities: "schools"
+  x-dependencies: "DATA-*, SETUP-01-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /setup/trusts:
+
+post:
+  tags: [SETUP]
+  summary: "Wizard: Trust creation"
+  operationId: setup_setup_01_001
+  x-activity-id: "SETUP-01-001"
+  x-db-entities: "trusts, system_config"
+  x-dependencies: "DATA-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [SETUP]
+  summary: "Trust/school-level config"
+  operationId: setup_setup_01_006
+  x-activity-id: "SETUP-01-006"
+  x-db-entities: "trust_config"
+  x-dependencies: "SETUP-01-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /students:
+
+post:
+  tags: [STUD]
+  summary: "Student ID & roll allocation"
+  operationId: stud_stud_04_005
+  x-activity-id: "STUD-04-005"
+  x-db-entities: "students, sections"
+  x-dependencies: "STUD-04-001, SETUP-01-004"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [STUD]
+  summary: "Siblings & category allocation"
+  operationId: stud_stud_04_006
+  x-activity-id: "STUD-04-006"
+  x-db-entities: "students, student_parents, trust_config"
+  x-dependencies: "STUD-04-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /students/admissions:
+
+post:
+  tags: [STUD]
+  summary: "Student admission"
+  operationId: stud_stud_04_001
+  x-activity-id: "STUD-04-001"
+  x-db-entities: "students, admissions, documents"
+  x-dependencies: "SETUP-*, AUTH-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [STUD]
+  summary: "Admission approval workflow"
+  operationId: stud_stud_04_002
+  x-activity-id: "STUD-04-002"
+  x-db-entities: "admissions, audit_logs"
+  x-dependencies: "STUD-04-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [STUD]
+  summary: "Readmission/promotion"
+  operationId: stud_stud_04_003
+  x-activity-id: "STUD-04-003"
+  x-db-entities: "students, academic_years, sections"
+  x-dependencies: "SETUP-01-003, SETUP-01-004"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /students/documents:
+
+post:
+  tags: [STUD]
+  summary: "Student documents & certificates"
+  operationId: stud_stud_04_007
+  x-activity-id: "STUD-04-007"
+  x-db-entities: "documents, students"
+  x-dependencies: "STUD-04-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /students/transfers:
+
+post:
+  tags: [STUD]
+  summary: "Inter-school transfer (in-trust)"
+  operationId: stud_stud_04_004
+  x-activity-id: "STUD-04-004"
+  x-db-entities: "student_transfers, schools, students"
+  x-dependencies: "STUD-04-001, SETUP-01-002"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/schemas/master:
+
+post:
+  tags: [DATA]
+  summary: "Master DB schema creation"
+  operationId: data_data_00_002
+  x-activity-id: "DATA-00-002"
+  x-db-entities: "system_config, trusts, system_users, migration_versions, sessions, system_audit_logs"
+  x-dependencies: "nan"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/schemas/trusts:
+
+post:
+  tags: [DATA]
+  summary: "Trust DB schema template"
+  operationId: data_data_00_003
+  x-activity-id: "DATA-00-003"
+  x-db-entities: "schools, classes, sections, users, user_school_assignments, houses, academic_years, trust_config, audit_logs"
+  x-dependencies: "DATA-00-002"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/trusts:
+
+post:
+  tags: [DATA]
+  summary: "Trust registry & subdomains"
+  operationId: data_data_00_005
+  x-activity-id: "DATA-00-005"
+  x-db-entities: "trusts"
+  x-dependencies: "DATA-00-002"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/users:
+
+post:
+  tags: [DATA]
+  summary: "System users (sys/group admin)"
+  operationId: data_data_00_006
+  x-activity-id: "DATA-00-006"
+  x-db-entities: "system_users"
+  x-dependencies: "DATA-00-002"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/audit-logs/system:
+
+post:
+  tags: [DATA]
+  summary: "Global audit logging"
+  operationId: data_data_00_009
+  x-activity-id: "DATA-00-009"
+  x-db-entities: "system_audit_logs"
+  x-dependencies: "DATA-00-002"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/audit-logs/tenants:
+
+post:
+  tags: [DATA]
+  summary: "Tenant audit logging"
+  operationId: data_data_00_010
+  x-activity-id: "DATA-00-010"
+  x-db-entities: "audit_logs"
+  x-dependencies: "DATA-00-003"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/config:
+
+post:
+  tags: [DATA]
+  summary: "System config storage"
+  operationId: data_data_00_004
+  x-activity-id: "DATA-00-004"
+  x-db-entities: "system_config"
+  x-dependencies: "DATA-00-002"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/config/cache:
+
+put:
+  tags: [DATA]
+  summary: "Config cache management"
+  operationId: data_data_00_011
+  x-activity-id: "DATA-00-011"
+  x-db-entities: "trusts, system_config"
+  x-dependencies: "DATA-00-004, DATA-00-005"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/connections/status:
+
+get:
+  tags: [DATA]
+  summary: "Connection Manager"
+  operationId: data_data_00_001
+  x-activity-id: "DATA-00-001"
+  x-db-entities: "system_config, trusts, system_users, migration_versions, sessions, system_audit_logs, schools, classes, sections, users, user_school_assignments, houses, academic_years, trust_config, audit_logs"
+  x-dependencies: "nan"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/connections/cleanup:
+
+post:
+  tags: [DATA]
+  summary: "Pool cleanup & housekeeping"
+  operationId: data_data_00_012
+  x-activity-id: "DATA-00-012"
+  x-db-entities: "nan"
+  x-dependencies: "DATA-00-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/migrations:
+
+post:
+  tags: [DATA]
+  summary: "Migration tracking"
+  operationId: data_data_00_007
+  x-activity-id: "DATA-00-007"
+  x-db-entities: "migration_versions"
+  x-dependencies: "DATA-00-002, DATA-00-005"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /system/sessions:
+
+post:
+  tags: [DATA]
+  summary: "Session store"
+  operationId: data_data_00_008
+  x-activity-id: "DATA-00-008"
+  x-db-entities: "sessions"
+  x-dependencies: "DATA-00-002"
+  responses:
+    "201":
+      description: Created
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /users:
+
+post:
+  tags: [USER]
+  summary: "User creation & management"
+  operationId: user_user_03_001
+  x-activity-id: "USER-03-001"
+  x-db-entities: "users, schools"
+  x-dependencies: "SETUP-01-002, AUTH-*"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [USER]
+  summary: "User-school assignments"
+  operationId: user_user_03_002
+  x-activity-id: "USER-03-002"
+  x-db-entities: "user_school_assignments, users, schools"
+  x-dependencies: "USER-03-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+post:
+  tags: [USER]
+  summary: "Staff profile management"
+  operationId: user_user_03_005
+  x-activity-id: "USER-03-005"
+  x-db-entities: "users"
+  x-dependencies: "USER-03-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /users/parents/links:
+
+post:
+  tags: [USER]
+  summary: "Parent-student linking"
+  operationId: user_user_03_006
+  x-activity-id: "USER-03-006"
+  x-db-entities: "users, student_parents, students"
+  x-dependencies: "STUD-04-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /users/roles:
+
+post:
+  tags: [USER]
+  summary: "Role & permission assignment"
+  operationId: user_user_03_003
+  x-activity-id: "USER-03-003"
+  x-db-entities: "users, trust_config"
+  x-dependencies: "AUTH-02-004"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  /users/teachers/assignments:
+
+post:
+  tags: [USER]
+  summary: "Teacher subject/class allocation"
+  operationId: user_user_03_004
+  x-activity-id: "USER-03-004"
+  x-db-entities: "users, classes, sections, trust_config"
+  x-dependencies: "SETUP-01-004, USER-03-001"
+  responses:
+    "200":
+      description: OK
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

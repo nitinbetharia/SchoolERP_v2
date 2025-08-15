@@ -1,0 +1,310 @@
+{
+  "_comment": "Fill tokens/ids/bodies as needed. Each test case maps an activity ID to request details.",
+  "baseUrl": "http://localhost:3000/api/v1",
+  "auth": {
+    "bearer": "REPLACE_WITH_JWT"
+  },
+  "cases": [
+    {
+      "activityId": "DATA-00-001",
+      "name": "Connection Manager should respond",
+      "method": "GET",
+      "path": "/system/connections/status",
+      "headers": {
+        "Authorization": "Bearer ${TOKEN}"
+      },
+      "body": {},
+      "expect": [200, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-002",
+      "name": "Master DB schema creation",
+      "method": "POST",
+      "path": "/system/schemas/master",
+      "headers": {
+        "Authorization": "Bearer ${TOKEN}",
+        "Content-Type": "application/json"
+      },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-003",
+      "name": "Trust DB schema template",
+      "method": "POST",
+      "path": "/system/schemas/trusts",
+      "headers": {
+        "Authorization": "Bearer ${TOKEN}",
+        "Content-Type": "application/json"
+      },
+      "body": {"trust_id": 1},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-004",
+      "name": "System config storage",
+      "method": "POST",
+      "path": "/system/config",
+      "headers": {
+        "Authorization": "Bearer ${TOKEN}",
+        "Content-Type": "application/json"
+      },
+      "body": {"config_key": "test_key", "config_value": "test_value"},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-005",
+      "name": "Trust registry & subdomains",
+      "method": "POST",
+      "path": "/system/trusts",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"trust_name": "Test Trust", "trust_code": "TEST", "subdomain": "test"},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-006",
+      "name": "System users (sys/group admin)",
+      "method": "POST",
+      "path": "/system/users",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"email": "admin@test.com", "password": "password123", "role": "SYSTEM_ADMIN"},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-007",
+      "name": "Migration tracking",
+      "method": "POST",
+      "path": "/system/migrations",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"migration_version": "0001_test"},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-008",
+      "name": "Session store",
+      "method": "POST",
+      "path": "/system/sessions",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"action": "CREATE", "user_id": 1},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-009",
+      "name": "Global audit logging",
+      "method": "POST",
+      "path": "/system/audit-logs/system",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"event_type": "TEST_EVENT"},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-010",
+      "name": "Tenant audit logging",
+      "method": "POST",
+      "path": "/system/audit-logs/tenants",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"trust_id": 1, "event_type": "TEST_EVENT"},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-011",
+      "name": "Config cache management", 
+      "method": "PUT",
+      "path": "/system/config/cache",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {"action": "REFRESH"},
+      "expect": [200, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "DATA-00-012",
+      "name": "Pool cleanup & housekeeping",
+      "method": "POST",
+      "path": "/system/connections/cleanup",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-001",
+      "name": "Wizard: Trust creation",
+      "method": "POST",
+      "path": "/setup/trusts",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-002",
+      "name": "Wizard: School creation",
+      "method": "POST",
+      "path": "/setup/schools",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-003",
+      "name": "Wizard: Academic year creation",
+      "method": "POST",
+      "path": "/setup/academic-years",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-004",
+      "name": "Class & section setup (+ House)",
+      "method": "POST",
+      "path": "/setup/classes",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-005",
+      "name": "Subject & grading configuration",
+      "method": "POST",
+      "path": "/setup/academics",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-006",
+      "name": "Trust/school-level config",
+      "method": "POST",
+      "path": "/setup/trusts",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "SETUP-01-007",
+      "name": "Role seeding (admins)",
+      "method": "POST",
+      "path": "/setup/roles",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-001",
+      "name": "Local auth (web sessions)",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-002",
+      "name": "JWT auth (APIs)",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-004",
+      "name": "RBAC (roles & permissions)",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-005",
+      "name": "Permission mapping",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-006",
+      "name": "Account lockout",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-007",
+      "name": "Email/phone verification",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-009",
+      "name": "Auth event logging",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-010",
+      "name": "API keys/tokens",
+      "method": "POST",
+      "path": "/auth",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-003",
+      "name": "Multi-factor (OTP)",
+      "method": "POST",
+      "path": "/auth/mfa",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    },
+    {
+      "activityId": "AUTH-02-008",
+      "name": "Password reset flows",
+      "method": "POST",
+      "path": "/auth/password",
+      "headers": { "Authorization": "Bearer ${TOKEN}", "Content-Type": "application/json" },
+      "body": {},
+      "expect": [201, 400],
+      "validateAgainstOpenAPI": true
+    }
+  ]
+}

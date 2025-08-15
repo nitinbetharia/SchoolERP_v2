@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(npm start)",
+      "Bash(grep:*)",
+      "Bash(taskkill:*)",
+      "Bash(node:*)",
+      "Bash(npm run test:contract:*)",
+      "Bash(mysql:*)",
+      "Bash(where mysql)",
+      "Bash(winget search:*)",
+      "Bash(docker:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(rm:*)",
+      "Bash(wmic process where:*)",
+      "Bash(kill:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(pkill:*)",
+      "Bash(tasklist)",
+      "Bash(PORT=3001 npm run dev)",
+      "Bash(PORT=3003 npm run dev)",
+      "Bash(CONTRACT_TOKEN=test npm run test:contract)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run seed:database:*)",
+      "Bash(ts-node:*)",
+      "Bash(API_BASE_URL=http://localhost:3001/api/v1 npx ts-node scripts/seed-database.ts)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "D:\\d\\Users\\Admin\\Documents\\Projects"
+    ]
+  }
+}
