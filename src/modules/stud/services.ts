@@ -149,7 +149,7 @@ export async function stud_04_003Service(input: Stud04003RequestT): Promise<Stud
 
 /** STUD-04-004 — Inter-school transfer (in-trust) */
 export async function stud_04_004Service(input: Stud04004RequestT, trustId: number): Promise<Stud04004ResponseT> {
-  const { student_id, from_school_id, to_school_id, transfer_date, transfer_reason, new_class_id, new_section_id, new_admission_number, remarks } = input;
+  const { student_id, from_school_id, to_school_id, transfer_date, reason, requested_by } = input;
 
   // Validate student exists
   const student = await repo.findStudentById(student_id, trustId);
@@ -164,13 +164,6 @@ export async function stud_04_004Service(input: Stud04004RequestT, trustId: numb
     throw new Error('Source or destination school not found');
   }
 
-  // Validate new admission number is unique
-  if (new_admission_number) {
-    const existing = await repo.findStudentByAdmissionNumber(new_admission_number, to_school_id, trustId);
-    if (existing) {
-      throw new Error('New admission number already exists at destination school');
-    }
-  }
 
   // Create transfer record
   const transferData = {
@@ -178,11 +171,7 @@ export async function stud_04_004Service(input: Stud04004RequestT, trustId: numb
     from_school_id,
     to_school_id,
     transfer_date,
-    transfer_reason,
-    new_class_id,
-    new_section_id,
-    new_admission_number,
-    remarks,
+    transfer_reason: reason || 'Transfer requested',
     status: 'COMPLETED'
   };
 
@@ -190,28 +179,23 @@ export async function stud_04_004Service(input: Stud04004RequestT, trustId: numb
 
   // Update student record
   await repo.updateStudentSchool(student_id, {
-    school_id: to_school_id,
-    class_id: new_class_id,
-    section_id: new_section_id,
-    admission_number: new_admission_number || student.admission_number
+    school_id: to_school_id
   }, trustId);
 
   return {
     transfer_id: transfer.transfer_id,
     student_id,
-    from_school: fromSchool.school_name,
-    to_school: toSchool.school_name,
+    from_school_id,
+    to_school_id,
     transfer_date,
     status: 'COMPLETED',
-    new_admission_number: new_admission_number || student.admission_number,
-    transfer_reason,
     created_at: transfer.created_at
   };
 }
 
 /** STUD-04-005 — Student ID & roll allocation */
 export async function stud_04_005Service(input: Stud04005RequestT, trustId: number): Promise<Stud04005ResponseT> {
-  const { student_id, roll_number, house_id, student_id_format, generate_barcode } = input;
+  const { student_id, roll_number, section_id, academic_year_id } = input;
 
   // Validate student exists
   const student = await repo.findStudentById(student_id, trustId);
@@ -220,52 +204,29 @@ export async function stud_04_005Service(input: Stud04005RequestT, trustId: numb
   }
 
   // Validate roll number is unique within class
-  if (roll_number) {
-    const existingRoll = await repo.findStudentByRoll(roll_number, student.class_id, student.section_id || null, trustId);
-    if (existingRoll && existingRoll.id !== student_id) {
-      throw new Error('Roll number already assigned in this class/section');
-    }
+  const existingRoll = await repo.findStudentByRoll(parseInt(roll_number), student.class_id, section_id || null, trustId);
+  if (existingRoll && existingRoll.id !== student_id) {
+    throw new Error('Roll number already assigned in this class/section');
   }
 
-  // Generate student ID if format provided
-  let generatedStudentId = student.student_id || student.admission_number;
-  if (student_id_format) {
-    generatedStudentId = await repo.generateStudentId(student_id_format, student, trustId);
-  }
-
-  // Generate barcode if requested
-  let barcodeData;
-  if (generate_barcode) {
-    barcodeData = {
-      barcode_value: generatedStudentId,
-      barcode_format: 'CODE128',
-      generated_at: new Date().toISOString()
-    };
-  }
-
-  // Update student with new allocations
+  // Update student with new roll allocation
   await repo.updateStudentAllocations(student_id, {
     roll_number,
-    house_id,
-    student_id: generatedStudentId,
-    barcode_data: barcodeData
+    section_id
   }, trustId);
 
   return {
     student_id,
-    student_name: `${student.first_name} ${student.last_name}`,
-    admission_number: student.admission_number,
-    generated_student_id: generatedStudentId,
     roll_number,
-    house_id,
-    barcode: barcodeData,
+    section_id,
+    previous_roll: student.roll_number,
     updated_at: new Date().toISOString()
   };
 }
 
 /** STUD-04-006 — Siblings & category allocation */
 export async function stud_04_006Service(input: Stud04006RequestT, trustId: number): Promise<Stud04006ResponseT> {
-  const { student_id, sibling_ids, category, subcategory, fee_category, transport_category, scholarship_details } = input;
+  const { student_id, sibling_student_ids, category, subcaste, religion, nationality } = input;
 
   // Validate student exists
   const student = await repo.findStudentById(student_id, trustId);
@@ -275,59 +236,49 @@ export async function stud_04_006Service(input: Stud04006RequestT, trustId: numb
 
   // Validate siblings exist
   const siblings = [];
-  for (const siblingId of sibling_ids) {
-    const sibling = await repo.findStudentById(siblingId, trustId);
-    if (!sibling) {
-      throw new Error(`Sibling with ID ${siblingId} not found`);
+  if (sibling_student_ids) {
+    for (const siblingId of sibling_student_ids) {
+      const sibling = await repo.findStudentById(siblingId, trustId);
+      if (!sibling) {
+        throw new Error(`Sibling with ID ${siblingId} not found`);
+      }
+      siblings.push(sibling);
     }
-    siblings.push(sibling);
   }
 
   // Create sibling relationships
-  for (const siblingId of sibling_ids) {
-    await repo.createSiblingLink(student_id, siblingId, trustId);
-    await repo.createSiblingLink(siblingId, student_id, trustId); // Bidirectional
+  if (sibling_student_ids) {
+    for (const siblingId of sibling_student_ids) {
+      await repo.createSiblingLink(student_id, siblingId, trustId);
+      await repo.createSiblingLink(siblingId, student_id, trustId); // Bidirectional
+    }
   }
 
   // Update student categories
   const categoryData = {
     student_id,
-    category,
-    subcategory,
-    fee_category,
-    transport_category,
-    scholarship_details
+    category: category || null,
+    subcaste: subcaste || null,
+    religion: religion || null,
+    nationality: nationality || null
   };
 
   await repo.updateStudentCategories(categoryData, trustId);
 
-  // Apply category-based benefits
-  const benefits = await repo.calculateCategoryBenefits(category, subcategory, trustId);
-
   return {
     student_id,
-    student_name: `${student.first_name} ${student.last_name}`,
-    siblings: siblings.map(s => ({
-      sibling_id: s.id,
-      sibling_name: `${s.first_name} ${s.last_name}`,
-      admission_number: s.admission_number,
-      class_name: s.class_name || 'N/A'
-    })),
-    category_allocation: {
-      category,
-      subcategory,
-      fee_category,
-      transport_category
-    },
-    benefits_applied: benefits,
-    scholarship_details,
+    siblings_linked: siblings.length,
+    category: category || null,
+    subcaste: subcaste || null,
+    religion: religion || null,
+    nationality: nationality || null,
     updated_at: new Date().toISOString()
   };
 }
 
 /** STUD-04-007 — Student documents & certificates */
 export async function stud_04_007Service(input: Stud04007RequestT, trustId: number): Promise<Stud04007ResponseT> {
-  const { student_id, document_type, document_number, issued_by, issued_date, expiry_date, file_path, verification_status, remarks } = input;
+  const { student_id, document_type, file_name, file_path, uploaded_by, file_size, description } = input;
 
   // Validate student exists
   const student = await repo.findStudentById(student_id, trustId);
@@ -335,127 +286,66 @@ export async function stud_04_007Service(input: Stud04007RequestT, trustId: numb
     throw new Error('Student not found');
   }
 
-  // Check for duplicate documents
-  const existingDoc = await repo.findStudentDocument(student_id, document_type, document_number, trustId);
-  if (existingDoc) {
-    throw new Error('Document with same type and number already exists for this student');
-  }
 
   // Create document record
   const documentData = {
     student_id,
     document_type,
-    document_number,
-    issued_by,
-    issued_date,
-    expiry_date,
+    file_name,
     file_path,
-    verification_status: verification_status || 'PENDING',
-    remarks
+    uploaded_by,
+    file_size: file_size || 0,
+    description
   };
 
   const document = await repo.createStudentDocument(documentData, trustId);
 
-  // Auto-verify certain document types
-  if (['BIRTH_CERTIFICATE', 'AADHAR'].includes(document_type)) {
-    await repo.updateDocumentVerification(document.document_id, 'VERIFIED', 'Auto-verified system document', trustId);
-  }
-
-  // Generate certificate if applicable
-  let certificateGenerated = false;
-  if (['TC', 'CHARACTER_CERTIFICATE', 'BONAFIDE'].includes(document_type)) {
-    await repo.generateCertificate(student_id, document_type, trustId);
-    certificateGenerated = true;
-  }
-
   return {
     document_id: document.document_id,
     student_id,
-    student_name: `${student.first_name} ${student.last_name}`,
     document_type,
-    document_number,
-    verification_status: document.verification_status,
-    certificate_generated: certificateGenerated,
+    file_name,
     file_path,
-    issued_by,
-    issued_date,
-    expiry_date,
-    created_at: document.created_at
+    file_size: file_size || null,
+    uploaded_at: document.created_at
   };
 }
 
 /** STUD-04-008 — Student analytics */
 export async function stud_04_008Service(input: Stud04008RequestT, trustId: number): Promise<Stud04008ResponseT> {
-  const { school_ids, class_ids, academic_year_id, date_from, date_to, metrics, include_trends } = input;
+  const { school_id, class_id, academic_year_id, analytics_type, date_from, date_to } = input;
 
-  const dateRange = {
-    from: date_from || new Date(new Date().getFullYear(), 3, 1).toISOString().split('T')[0], // April 1st
-    to: date_to || new Date().toISOString().split('T')[0]
+  const params = {
+    trustId,
+    school_id,
+    class_id,
+    academic_year_id,
+    analytics_type,
+    date_from,
+    date_to
   };
 
-  // Get enrollment analytics
-  const enrollment = await repo.getEnrollmentAnalytics({
-    trustId,
-    school_ids,
-    class_ids,
-    academic_year_id,
-    dateRange
-  });
-
-  // Get attendance analytics
-  const attendance = await repo.getAttendanceAnalytics({
-    trustId,
-    school_ids,
-    class_ids,
-    dateRange
-  });
-
-  // Get fee analytics
-  const fees = await repo.getFeeAnalytics({
-    trustId,
-    school_ids,
-    class_ids,
-    dateRange
-  });
-
-  // Get demographic analytics
-  const demographics = await repo.getDemographicAnalytics({
-    trustId,
-    school_ids,
-    class_ids
-  });
-
-  // Get performance metrics
-  const performance = await repo.getPerformanceAnalytics({
-    trustId,
-    school_ids,
-    class_ids,
-    academic_year_id
-  });
-
-  let trends = undefined;
-  if (include_trends) {
-    trends = await repo.getTrendAnalytics({
-      trustId,
-      school_ids,
-      dateRange
-    });
+  let data = {};
+  
+  switch (analytics_type) {
+    case 'ENROLLMENT':
+      data = await repo.getEnrollmentAnalytics(params);
+      break;
+    case 'ATTENDANCE':
+      data = await repo.getAttendanceAnalytics(params);
+      break;
+    case 'PERFORMANCE':
+      data = await repo.getPerformanceAnalytics(params);
+      break;
+    case 'DEMOGRAPHICS':
+      data = await repo.getDemographicAnalytics(params);
+      break;
   }
 
   return {
-    analytics_id: `STUD_ANALYTICS_${Date.now()}`,
-    report_period: dateRange,
-    scope: {
-      school_count: school_ids?.length || 0,
-      class_count: class_ids?.length || 0,
-      academic_year_id
-    },
-    enrollment_analytics: enrollment,
-    attendance_analytics: attendance,
-    fee_analytics: fees,
-    demographic_analytics: demographics,
-    performance_analytics: performance,
-    trends,
-    generated_at: new Date().toISOString()
+    analytics_type,
+    data,
+    generated_at: new Date().toISOString(),
+    parameters: params
   };
 }

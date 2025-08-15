@@ -18,14 +18,6 @@ export async function findStudentById(studentId: number, trustId: number) {
   return (rows as any[])[0] || null;
 }
 
-export async function findSchoolById(schoolId: number, trustId: number) {
-  const connection = await dbManager.getTrustConnection(trustId);
-  const [rows] = await connection.execute<RowDataPacket[]>(
-    'SELECT * FROM schools WHERE id = ? LIMIT 1',
-    [schoolId]
-  );
-  return (rows as any[])[0] || null;
-}
 
 // STUD-04-001: Student admission
 export async function findStudentByAdmissionNumber(admission_number: string, school_id: number, trustId: number) {
@@ -213,8 +205,8 @@ export async function createStudentTransfer(transferData: any, trustId: number) 
 export async function updateStudentSchool(studentId: number, updateData: any, trustId: number) {
   const connection = await dbManager.getTrustConnection(trustId);
   await connection.execute(
-    `UPDATE students SET school_id = ?, class_id = ?, section_id = ?, admission_number = ?, updated_at = NOW() WHERE id = ?`,
-    [updateData.school_id, updateData.class_id, updateData.section_id, updateData.admission_number, studentId]
+    `UPDATE students SET school_id = ?, updated_at = NOW() WHERE id = ?`,
+    [updateData.school_id, studentId]
   );
 }
 
@@ -238,8 +230,8 @@ export async function generateStudentId(format: string, student: any, trustId: n
 export async function updateStudentAllocations(studentId: number, updateData: any, trustId: number) {
   const connection = await dbManager.getTrustConnection(trustId);
   await connection.execute(
-    `UPDATE students SET roll_number = ?, house_id = ?, student_id = ?, updated_at = NOW() WHERE id = ?`,
-    [updateData.roll_number, updateData.house_id, updateData.student_id, studentId]
+    `UPDATE students SET roll_number = ?, section_id = ?, updated_at = NOW() WHERE id = ?`,
+    [updateData.roll_number, updateData.section_id, studentId]
   );
 }
 
@@ -254,8 +246,8 @@ export async function createSiblingLink(studentId: number, siblingId: number, tr
 export async function updateStudentCategories(categoryData: any, trustId: number) {
   const connection = await dbManager.getTrustConnection(trustId);
   await connection.execute(
-    `UPDATE students SET category = ?, subcategory = ?, fee_category = ?, transport_category = ?, updated_at = NOW() WHERE id = ?`,
-    [categoryData.category, categoryData.subcategory, categoryData.fee_category, categoryData.transport_category, categoryData.student_id]
+    `UPDATE students SET category = ?, subcaste = ?, religion = ?, nationality = ?, updated_at = NOW() WHERE id = ?`,
+    [categoryData.category, categoryData.subcaste, categoryData.religion, categoryData.nationality, categoryData.student_id]
   );
 }
 
@@ -279,11 +271,11 @@ export async function findStudentDocument(studentId: number, docType: string, do
 export async function createStudentDocument(documentData: any, trustId: number) {
   const connection = await dbManager.getTrustConnection(trustId);
   const [result] = await connection.execute<ResultSetHeader>(
-    `INSERT INTO student_documents (student_id, document_type, document_number, issued_by, issued_date, expiry_date, file_path, verification_status, remarks, created_at) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-    [documentData.student_id, documentData.document_type, documentData.document_number, documentData.issued_by, documentData.issued_date, documentData.expiry_date, documentData.file_path, documentData.verification_status, documentData.remarks]
+    `INSERT INTO student_documents (student_id, document_type, file_name, file_path, uploaded_by, file_size, description, created_at) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+    [documentData.student_id, documentData.document_type, documentData.file_name, documentData.file_path, documentData.uploaded_by, documentData.file_size, documentData.description]
   );
-  return { document_id: result.insertId, verification_status: documentData.verification_status, created_at: new Date().toISOString() };
+  return { document_id: result.insertId, created_at: new Date().toISOString() };
 }
 
 export async function updateDocumentVerification(documentId: number, status: string, remarks: string, trustId: number) {

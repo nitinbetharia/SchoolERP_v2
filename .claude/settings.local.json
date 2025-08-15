@@ -35,7 +35,9 @@
       "Bash(git commit:*)",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
