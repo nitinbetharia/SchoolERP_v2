@@ -82,7 +82,7 @@ const ResetPasswordSchema = z.object({
 authRouter.get('/login', requireTrustContext, async (req, res) => {
   try {
     // Redirect if already authenticated
-    if (req.session?.user) {
+    if ((req.session as any)?.user) {
       return res.redirect('/dashboard');
     }
 
@@ -93,13 +93,13 @@ authRouter.get('/login', requireTrustContext, async (req, res) => {
       currentUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
       hideNavigation: true,
       hideFooter: true,
-      formData: req.session?.loginFormData || {},
-      fieldErrors: req.session?.fieldErrors || {}
+      formData: (req.session as any)?.loginFormData || {},
+      fieldErrors: (req.session as any)?.fieldErrors || {}
     };
 
     // Clear session form data after use
-    delete req.session?.loginFormData;
-    delete req.session?.fieldErrors;
+    delete (req.session as any)?.loginFormData;
+    delete (req.session as any)?.fieldErrors;
 
     res.render('auth/AUTH-02-001', pageData);
   } catch (error) {
@@ -125,16 +125,16 @@ authRouter.post('/login', requireTrustContext, authRateLimit, async (req, res) =
       const fieldErrors: Record<string, string> = {};
       validation.error.issues.forEach(issue => {
         if (issue.path.length > 0) {
-          fieldErrors[issue.path[0]] = issue.message;
+          fieldErrors[String(issue.path[0])] = issue.message;
         }
       });
 
-      req.session.loginFormData = {
+      (req.session as any).loginFormData = {
         email: req.body.email || '',
         remember_me: req.body.remember_me || false
       };
-      req.session.fieldErrors = fieldErrors;
-      req.session.flash = asFlash({ issues: validation.error.issues });
+      (req.session as any).fieldErrors = fieldErrors;
+      (req.session as any).flash = asFlash({ issues: validation.error.issues });
 
       return res.redirect('/auth/login');
     }
@@ -148,7 +148,7 @@ authRouter.post('/login', requireTrustContext, authRateLimit, async (req, res) =
       remember_me: remember_me || false
     }, {
       headers: {
-        'X-Trust-Context': res.locals.trust.slug
+        'X-Trust-Context': res.locals.trust?.slug || 'default'
       }
     });
 
@@ -156,7 +156,7 @@ authRouter.post('/login', requireTrustContext, authRateLimit, async (req, res) =
       const userData = loginResponse.data.data;
 
       // Set session data
-      req.session.user = {
+      (req.session as any).user = {
         id: userData.user_id,
         email: userData.email,
         first_name: userData.first_name,
@@ -164,29 +164,29 @@ authRouter.post('/login', requireTrustContext, authRateLimit, async (req, res) =
         role: userData.role,
         permissions: userData.permissions || [],
         school_id: userData.school_id,
-        trustId: res.locals.trust.trustId
+        trustId: res.locals.trust?.trustId || 1
       };
 
-      req.session.trustId = res.locals.trust.trustId;
-      req.session.sessionToken = userData.session_token;
+      (req.session as any).trustId = res.locals.trust?.trustId || 1;
+      (req.session as any).sessionToken = userData.session_token;
 
       // Set session timeout based on remember_me
       if (remember_me) {
-        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+        (req.session as any).cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
       } else {
-        req.session.cookie.maxAge = 8 * 60 * 60 * 1000; // 8 hours
+        (req.session as any).cookie.maxAge = 8 * 60 * 60 * 1000; // 8 hours
       }
 
       // Clear any previous login errors
-      delete req.session.loginFormData;
-      delete req.session.fieldErrors;
+      delete (req.session as any).loginFormData;
+      delete (req.session as any).fieldErrors;
 
       // Set success flash message
-      req.session.flash = successFlash(`Welcome back, ${userData.first_name}!`);
+      (req.session as any).flash = successFlash(`Welcome back, ${userData.first_name}!`);
 
       // Redirect to intended page or dashboard
-      const redirectTo = req.session.returnTo || '/dashboard';
-      delete req.session.returnTo;
+      const redirectTo = (req.session as any).returnTo || '/dashboard';
+      delete (req.session as any).returnTo;
       
       return res.redirect(redirectTo);
     } else {
@@ -198,14 +198,14 @@ authRouter.post('/login', requireTrustContext, authRateLimit, async (req, res) =
     console.error('Login error:', error);
 
     // Preserve form data
-    req.session.loginFormData = {
+    (req.session as any).loginFormData = {
       email: req.body.email || '',
       remember_me: req.body.remember_me || false
     };
 
     // Handle specific error types
     if (error?.response?.status === 401) {
-      req.session.flash = asFlash({
+      (req.session as any).flash = asFlash({
         response: {
           data: {
             error: {
@@ -216,14 +216,14 @@ authRouter.post('/login', requireTrustContext, authRateLimit, async (req, res) =
         }
       });
     } else if (error?.response?.status === 429) {
-      req.session.flash = asFlash({
+      (req.session as any).flash = asFlash({
         response: {
           status: 429,
           headers: { 'retry-after': '900' }
         }
       });
     } else {
-      req.session.flash = asFlash(error);
+      (req.session as any).flash = asFlash(error);
     }
 
     res.redirect('/auth/login');
@@ -254,13 +254,13 @@ authRouter.post('/otp/request', requireTrustContext, otpRateLimit, async (req, r
       phone
     }, {
       headers: {
-        'X-Trust-Context': res.locals.trust.slug
+        'X-Trust-Context': res.locals.trust?.slug || 'default'
       }
     });
 
     if (otpResponse.data.success) {
       // Store phone in session for verification
-      req.session.otpPhone = phone;
+      (req.session as any).otpPhone = phone;
       
       res.json({
         success: true,
@@ -277,7 +277,7 @@ authRouter.post('/otp/request', requireTrustContext, otpRateLimit, async (req, r
     console.error('OTP request error:', error);
     res.status(error?.response?.status || 500).json({
       success: false,
-      error: asFlash(error).error
+      error: (asFlash(error) as any).error || { code: 'UNKNOWN_ERROR', message: 'An unknown error occurred' }
     });
   }
 });
@@ -302,7 +302,7 @@ authRouter.post('/otp/verify', requireTrustContext, authRateLimit, async (req, r
     const { phone, otp } = validation.data;
 
     // Verify phone matches session
-    if (req.session.otpPhone !== phone) {
+    if ((req.session as any).otpPhone !== phone) {
       return res.status(400).json({
         success: false,
         error: {
@@ -318,7 +318,7 @@ authRouter.post('/otp/verify', requireTrustContext, authRateLimit, async (req, r
       otp
     }, {
       headers: {
-        'X-Trust-Context': res.locals.trust.slug
+        'X-Trust-Context': res.locals.trust?.slug || 'default'
       }
     });
 
@@ -326,7 +326,7 @@ authRouter.post('/otp/verify', requireTrustContext, authRateLimit, async (req, r
       const userData = verifyResponse.data.data;
 
       // Set session data
-      req.session.user = {
+      (req.session as any).user = {
         id: userData.user_id,
         email: userData.email,
         first_name: userData.first_name,
@@ -334,20 +334,20 @@ authRouter.post('/otp/verify', requireTrustContext, authRateLimit, async (req, r
         role: userData.role,
         permissions: userData.permissions || [],
         school_id: userData.school_id,
-        trustId: res.locals.trust.trustId
+        trustId: res.locals.trust?.trustId || 1
       };
 
-      req.session.trustId = res.locals.trust.trustId;
-      req.session.sessionToken = userData.session_token;
+      (req.session as any).trustId = res.locals.trust?.trustId || 1;
+      (req.session as any).sessionToken = userData.session_token;
 
       // Clean up OTP session data
-      delete req.session.otpPhone;
+      delete (req.session as any).otpPhone;
 
       res.json({
         success: true,
         data: {
           message: 'Login successful',
-          redirect: req.session.returnTo || '/dashboard'
+          redirect: (req.session as any).returnTo || '/dashboard'
         }
       });
     } else {
@@ -358,7 +358,7 @@ authRouter.post('/otp/verify', requireTrustContext, authRateLimit, async (req, r
     console.error('OTP verify error:', error);
     res.status(error?.response?.status || 500).json({
       success: false,
-      error: asFlash(error).error
+      error: (asFlash(error) as any).error || { code: 'UNKNOWN_ERROR', message: 'An unknown error occurred' }
     });
   }
 });
@@ -369,11 +369,11 @@ authRouter.post('/otp/verify', requireTrustContext, authRateLimit, async (req, r
 authRouter.post('/logout', async (req, res) => {
   try {
     // Call backend to invalidate session if token exists
-    if (req.session?.sessionToken) {
+    if ((req.session as any)?.sessionToken) {
       try {
         await api.post('/api/v1/auth/logout', {}, {
           headers: {
-            'Authorization': `Bearer ${req.session.sessionToken}`,
+            'Authorization': `Bearer ${(req.session as any).sessionToken}`,
             'X-Trust-Context': res.locals.trust?.slug
           }
         });
@@ -384,7 +384,7 @@ authRouter.post('/logout', async (req, res) => {
     }
 
     // Destroy session
-    req.session.destroy((err) => {
+    (req.session as any).destroy((err: any) => {
       if (err) {
         console.error('Session destruction error:', err);
       }
@@ -420,7 +420,7 @@ authRouter.post('/forgot-password', requireTrustContext, otpRateLimit, async (re
   try {
     const validation = ForgotPasswordSchema.safeParse(req.body);
     if (!validation.success) {
-      req.session.flash = asFlash({ issues: validation.error.issues });
+      (req.session as any).flash = asFlash({ issues: validation.error.issues });
       return res.redirect('/auth/forgot-password');
     }
 
@@ -431,12 +431,12 @@ authRouter.post('/forgot-password', requireTrustContext, otpRateLimit, async (re
       email
     }, {
       headers: {
-        'X-Trust-Context': res.locals.trust.slug
+        'X-Trust-Context': res.locals.trust?.slug || 'default'
       }
     });
 
     // Always show success message for security
-    req.session.flash = successFlash(
+    (req.session as any).flash = successFlash(
       'If an account with that email exists, we have sent password reset instructions.'
     );
     
@@ -444,7 +444,7 @@ authRouter.post('/forgot-password', requireTrustContext, otpRateLimit, async (re
 
   } catch (error) {
     console.error('Forgot password error:', error);
-    req.session.flash = successFlash(
+    (req.session as any).flash = successFlash(
       'If an account with that email exists, we have sent password reset instructions.'
     );
     res.redirect('/auth/forgot-password');

@@ -44,7 +44,7 @@ export class WizardEngine {
 
     // Initialize or restore session
     const sessionKey = `wizard_${wizardId}`;
-    let session: WizardSession = req.session[sessionKey] || {
+    let session: WizardSession = (req.session as any)[sessionKey] || {
       wizardId,
       currentStep: config.steps[0].id,
       completedSteps: [],
@@ -72,7 +72,7 @@ export class WizardEngine {
     }
 
     session.lastActivity = new Date();
-    req.session[sessionKey] = session;
+    (req.session as any)[sessionKey] = session;
 
     // Attach wizard context to request
     const currentStep = config.steps.find(s => s.id === session.currentStep)!;
@@ -150,10 +150,10 @@ export class WizardEngine {
         redirectTo: `/setup/${config.id}/review`
       };
 
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
-        errors: [`Processing error: ${error.message}`]
+        errors: [`Processing error: ${error?.message || 'Unknown error'}`]
       };
     }
   }
@@ -183,7 +183,7 @@ export class WizardEngine {
    */
   static resetWizard(req: Request, wizardId: string): void {
     const sessionKey = `wizard_${wizardId}`;
-    delete req.session[sessionKey];
+    delete (req.session as any)[sessionKey];
   }
 
   /**

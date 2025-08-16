@@ -1,271 +1,166 @@
 /**
- * Error Envelope Middleware - Convert API errors to flash messages
- * Provides DRY error handling for frontend
+ * Error Handling Middleware for Frontend Routes
+ * Provides flash message support and consistent error handling
  */
 
 import { Request, Response, NextFunction } from 'express';
 
-export interface ErrorEnvelope {
-  code: string;
+export interface FlashMessage {
+  type: 'success' | 'error' | 'warning' | 'info';
+  title?: string;
   message: string;
-  details?: any[];
-  traceId?: string;
+  details?: any;
 }
 
-export interface FlashMessage {
-  error?: ErrorEnvelope;
-  success?: string | { message: string };
-  warning?: string | { message: string };
-  info?: string | { message: string };
+// Extend Express Session to include flash
+declare module 'express-session' {
+  interface SessionData {
+    flash?: FlashMessage;
+    fieldErrors?: Record<string, string>;
+  }
 }
 
 /**
- * Convert various error formats to flash message format
+ * Flash message middleware
+ */
+export const flashMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  res.locals.flash = (req.session as any)?.flash || null;
+  
+  // Clear flash message after use
+  if ((req.session as any)?.flash) {
+    delete (req.session as any).flash;
+  }
+  
+  next();
+};
+
+/**
+ * Convert error to flash message format
  */
 export function asFlash(error: any): FlashMessage {
-  // Already in flash format
-  if (error && typeof error === 'object' && (error.error || error.success || error.warning || error.info)) {
-    return error;
-  }
-
-  // API response error format
   if (error?.response?.data?.error) {
-    return { error: error.response.data.error };
-  }
-
-  // Axios error with response
-  if (error?.response?.data) {
-    const data = error.response.data;
-    if (data.success === false && data.error) {
-      return { error: data.error };
-    }
-  }
-
-  // HTTP status code errors
-  if (error?.response?.status) {
-    const status = error.response.status;
-    let message = 'An error occurred';
-    let code = 'HTTP_ERROR';
-
-    switch (status) {
-      case 400:
-        message = 'Invalid request data';
-        code = 'BAD_REQUEST';
-        break;
-      case 401:
-        message = 'Authentication required';
-        code = 'UNAUTHORIZED';
-        break;
-      case 403:
-        message = 'Access denied';
-        code = 'FORBIDDEN';
-        break;
-      case 404:
-        message = 'Resource not found';
-        code = 'NOT_FOUND';
-        break;
-      case 429:
-        message = 'Too many requests. Please wait and try again.';
-        code = 'RATE_LIMIT';
-        break;
-      case 500:
-        message = 'Internal server error';
-        code = 'INTERNAL_ERROR';
-        break;
-      default:
-        message = `Server error (${status})`;
-        code = `HTTP_${status}`;
-    }
-
+    // API error response
+    const apiError = error.response.data.error;
     return {
-      error: {
-        code,
-        message,
-        details: error.response.data?.details || [],
-        traceId: error.response.headers['x-trace-id']
-      }
+      type: 'error',
+      title: 'Error',
+      message: apiError.message || 'An error occurred',
+      details: apiError.details
     };
   }
-
-  // Validation errors (Zod)
-  if (error?.issues && Array.isArray(error.issues)) {
+  
+  if (error?.response?.status === 429) {
+    // Rate limiting error
+    const retryAfter = error.response.headers?.['retry-after'] || '60';
     return {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Please fix the highlighted fields',
-        details: error.issues.map((issue: any) => ({
-          path: issue.path?.join('.') || 'unknown',
-          message: issue.message
-        }))
-      }
+      type: 'error',
+      title: 'Too Many Requests',
+      message: `Please wait ${retryAfter} seconds before trying again`,
+      details: { retryAfter }
     };
   }
-
-  // Generic error with message
+  
+  if (error?.issues) {
+    // Zod validation error
+    return {
+      type: 'error',
+      title: 'Validation Error',
+      message: 'Please check the form and correct any errors',
+      details: error.issues
+    };
+  }
+  
   if (error?.message) {
     return {
-      error: {
-        code: error.code || 'GENERIC_ERROR',
-        message: error.message,
-        details: error.details ? [error.details] : []
-      }
+      type: 'error',
+      title: 'Error',
+      message: error.message,
+      details: null
     };
   }
-
-  // String error
-  if (typeof error === 'string') {
-    return {
-      error: {
-        code: 'GENERIC_ERROR',
-        message: error
-      }
-    };
-  }
-
-  // Fallback
+  
   return {
-    error: {
-      code: 'UNKNOWN_ERROR',
-      message: 'An unknown error occurred',
-      details: []
-    }
+    type: 'error',
+    title: 'Error',
+    message: 'An unexpected error occurred',
+    details: null
   };
 }
 
 /**
  * Create success flash message
  */
-export function successFlash(message: string): FlashMessage {
-  return { success: message };
+export function successFlash(message: string, title?: string): FlashMessage {
+  return {
+    type: 'success',
+    title: title || 'Success',
+    message,
+    details: null
+  };
 }
 
 /**
  * Create warning flash message
  */
-export function warningFlash(message: string): FlashMessage {
-  return { warning: message };
+export function warningFlash(message: string, title?: string): FlashMessage {
+  return {
+    type: 'warning',
+    title: title || 'Warning',
+    message,
+    details: null
+  };
 }
 
 /**
  * Create info flash message
  */
-export function infoFlash(message: string): FlashMessage {
-  return { info: message };
+export function infoFlash(message: string, title?: string): FlashMessage {
+  return {
+    type: 'info',
+    title: title || 'Information',
+    message,
+    details: null
+  };
 }
 
 /**
- * Flash message middleware - sets up flash messaging
+ * Frontend error handler middleware
  */
-export function flashMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Initialize session flash if not exists
-  if (!req.session.flash) {
-    req.session.flash = {};
-  }
-
-  // Helper to set flash message
-  res.locals.setFlash = function(flash: FlashMessage) {
-    Object.assign(req.session.flash, flash);
-  };
-
-  // Helper to get and clear flash messages
-  res.locals.getFlash = function(): FlashMessage | null {
-    const flash = req.session.flash;
-    req.session.flash = {}; // Clear after retrieving
-    return Object.keys(flash).length > 0 ? flash : null;
-  };
-
-  // Make flash available in templates
-  res.locals.flash = res.locals.getFlash();
-
-  next();
-}
-
-/**
- * Error handling middleware for frontend routes
- */
-export function frontendErrorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-  console.error('Frontend error:', err);
-
-  const flash = asFlash(err);
+export const frontendErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('Frontend error:', error);
   
-  // If it's an API call (AJAX), return JSON
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.status(err.status || 500).json({
-      success: false,
-      error: flash.error
-    });
-  }
-
-  // For regular page requests, render error page or redirect with flash
-  const status = err.status || 500;
-
-  if (status === 404) {
+  // Set flash message
+  (req.session as any).flash = asFlash(error);
+  
+  // Handle different error types
+  if (error.status === 404) {
     return res.status(404).render('errors/404', {
       title: 'Page Not Found',
       message: 'The requested page could not be found',
-      flash,
       hideNavigation: false
     });
   }
-
-  if (status === 403) {
+  
+  if (error.status === 403) {
     return res.status(403).render('errors/403', {
       title: 'Access Denied',
       message: 'You do not have permission to access this resource',
-      flash,
       hideNavigation: false
     });
   }
-
-  if (status === 500) {
-    return res.status(500).render('errors/500', {
-      title: 'Server Error',
-      message: 'An internal server error occurred',
-      flash,
-      hideNavigation: false
-    });
+  
+  if (error.status === 401) {
+    // Redirect to login for authentication errors
+    (req.session as any).returnTo = req.originalUrl;
+    return res.redirect('/auth/login');
   }
-
-  // For other errors, redirect to previous page with flash message
-  if (req.get('Referer')) {
-    req.session.flash = flash;
-    return res.redirect(req.get('Referer')!);
-  }
-
-  // Fallback to home page
-  req.session.flash = flash;
-  res.redirect('/');
-}
-
-/**
- * Rate limit error handler
- */
-export function rateLimitHandler(req: Request, res: Response) {
-  const flash = asFlash({
-    response: {
-      status: 429,
-      headers: { 'retry-after': res.get('Retry-After') || '60' }
-    }
+  
+  // Generic error page
+  res.status(500).render('errors/500', {
+    title: 'Server Error',
+    message: process.env.NODE_ENV === 'production' 
+      ? 'An internal server error occurred' 
+      : error.message,
+    hideNavigation: false
   });
-
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.status(429).json({
-      success: false,
-      error: flash.error
-    });
-  }
-
-  req.session.flash = flash;
-  const referer = req.get('Referer');
-  res.redirect(referer || '/');
-}
-
-export default {
-  asFlash,
-  successFlash,
-  warningFlash,
-  infoFlash,
-  flashMiddleware,
-  frontendErrorHandler,
-  rateLimitHandler
 };

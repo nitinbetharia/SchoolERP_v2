@@ -110,7 +110,7 @@ async function getTrustContext(trustSlug: string): Promise<TrustContext | null> 
 
     // Get trust configuration
     const [configRows] = await masterConnection.execute<RowDataPacket[]>(
-      'SELECT config_key, config_value FROM trust_config WHERE trust_id = ?',
+      'SELECT config_key, config_value FROM system_config WHERE trust_id = ?',
       [trust.id]
     );
 

@@ -1,26 +1,26 @@
-<%- include('../layouts/base', { body: `
-<!-- 404 - Page Not Found -->
+<%- include('../layouts/base') { body: `
+<!-- 400 - Bad Request -->
 <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div class="text-center">
             <!-- Error Icon -->
-            <div class="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <div class="mx-auto h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="h-12 w-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                 </svg>
             </div>
 
             <!-- Error Code -->
-            <h1 class="text-6xl font-bold text-gray-900 mb-4">404</h1>
+            <h1 class="text-6xl font-bold text-gray-900 mb-4">400</h1>
             
             <!-- Error Title -->
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-                Page Not Found
+                <%= title || 'Bad Request' %>
             </h2>
             
             <!-- Error Message -->
             <p class="text-gray-600 mb-8 text-lg">
-                The page you're looking for doesn't exist or has been moved.
+                <%= message || 'The request was invalid or cannot be processed.' %>
             </p>
 
             <!-- Actions -->
@@ -33,23 +33,13 @@
                     Go Back
                 </button>
                 
-                <a href="/" 
+                <a href="/dashboard" 
                    class="w-full inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tenant-primary transition-colors">
                     <svg class="mr-2 -ml-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
                     Go to Dashboard
                 </a>
-            </div>
-
-            <!-- Helpful Links -->
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <p class="text-sm text-gray-500 mb-4">Looking for something specific?</p>
-                <div class="flex flex-wrap justify-center gap-4 text-sm">
-                    <a href="/auth/login" class="text-tenant-primary hover:text-tenant-secondary font-medium">Login</a>
-                    <a href="/setup" class="text-tenant-primary hover:text-tenant-secondary font-medium">Setup</a>
-                    <a href="/dashboard" class="text-tenant-primary hover:text-tenant-secondary font-medium">Dashboard</a>
-                </div>
             </div>
 
             <!-- Contact Support -->
@@ -64,4 +54,4 @@
         </div>
     </div>
 </div>
-` }) %>
+` } %>

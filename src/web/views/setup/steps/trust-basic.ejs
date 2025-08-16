@@ -1,0 +1,311 @@
+<%- include('../../layouts/base') { body: `
+<!-- Trust Basic Information Step - SETUP-01-001 -->
+<div class="max-w-4xl mx-auto">
+    <!-- Wizard Navigation -->
+    <%- include('../../partials/wizard/wizard-nav') %>
+    
+    <!-- Step Content -->
+    <div class="bg-white rounded-lg shadow-md border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-900">Trust Information</h2>
+            <p class="mt-1 text-gray-600">
+                Provide basic information about your educational trust. This will be used for branding and identification throughout the system.
+            </p>
+        </div>
+        
+        <form id="trust-basic-form" data-wizard-form class="p-6" method="POST" action="/setup/trust-setup/trust-basic">
+            <!-- Trust Name -->
+            <div class="mb-6">
+                <label for="trust_name" class="block text-sm font-medium text-gray-700 mb-2">
+                    Trust Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="trust_name" 
+                       name="trust_name" 
+                       value="<%= formData.trust_name || '' %>"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary
+                              <%= fieldErrors.trust_name ? 'border-red-300 bg-red-50' : '' %>"
+                       placeholder="e.g., ABC Educational Trust"
+                       required
+                       maxlength="255">
+                <% if (fieldErrors.trust_name) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.trust_name %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    The official name of your educational trust or organization
+                </p>
+            </div>
+
+            <!-- Trust Code -->
+            <div class="mb-6">
+                <label for="trust_code" class="block text-sm font-medium text-gray-700 mb-2">
+                    Trust Code <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="trust_code" 
+                       name="trust_code" 
+                       value="<%= formData.trust_code || '' %>"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary uppercase
+                              <%= fieldErrors.trust_code ? 'border-red-300 bg-red-50' : '' %>"
+                       placeholder="e.g., ABC_TRUST"
+                       required
+                       maxlength="20"
+                       pattern="[A-Z0-9_]+"
+                       oninput="this.value = this.value.toUpperCase()">
+                <% if (fieldErrors.trust_code) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.trust_code %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    A unique identifier for your trust (uppercase letters, numbers, and underscores only)
+                </p>
+            </div>
+
+            <!-- Subdomain -->
+            <div class="mb-6">
+                <label for="subdomain" class="block text-sm font-medium text-gray-700 mb-2">
+                    Subdomain <span class="text-red-500">*</span>
+                </label>
+                <div class="flex">
+                    <input type="text" 
+                           id="subdomain" 
+                           name="subdomain" 
+                           value="<%= formData.subdomain || '' %>"
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary lowercase
+                                  <%= fieldErrors.subdomain ? 'border-red-300 bg-red-50' : '' %>"
+                           placeholder="e.g., abctrust"
+                           required
+                           maxlength="50"
+                           pattern="[a-z0-9-]+"
+                           oninput="this.value = this.value.toLowerCase()">
+                    <span class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 text-sm">
+                        .schoolerp.com
+                    </span>
+                </div>
+                <% if (fieldErrors.subdomain) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.subdomain %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    Your trust will be accessible at: <span id="subdomain-preview" class="font-medium text-tenant-primary">your-subdomain.schoolerp.com</span>
+                </p>
+            </div>
+
+            <!-- Contact Email -->
+            <div class="mb-6">
+                <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Email <span class="text-red-500">*</span>
+                </label>
+                <input type="email" 
+                       id="contact_email" 
+                       name="contact_email" 
+                       value="<%= formData.contact_email || '' %>"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary
+                              <%= fieldErrors.contact_email ? 'border-red-300 bg-red-50' : '' %>"
+                       placeholder="e.g., admin@abctrust.org"
+                       required>
+                <% if (fieldErrors.contact_email) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.contact_email %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    Primary contact email for administrative communication
+                </p>
+            </div>
+
+            <!-- Contact Phone (Optional) -->
+            <div class="mb-6">
+                <label for="contact_phone" class="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Phone
+                </label>
+                <input type="tel" 
+                       id="contact_phone" 
+                       name="contact_phone" 
+                       value="<%= formData.contact_phone || '' %>"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary
+                              <%= fieldErrors.contact_phone ? 'border-red-300 bg-red-50' : '' %>"
+                       placeholder="e.g., +91 98765 43210"
+                       maxlength="15">
+                <% if (fieldErrors.contact_phone) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.contact_phone %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    Optional contact phone number
+                </p>
+            </div>
+
+            <!-- Description (Optional) -->
+            <div class="mb-6">
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                <textarea id="description" 
+                          name="description" 
+                          rows="4"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary
+                                 <%= fieldErrors.description ? 'border-red-300 bg-red-50' : '' %>"
+                          placeholder="Brief description of your trust's mission and objectives"><%= formData.description || '' %></textarea>
+                <% if (fieldErrors.description) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.description %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    Optional description of your trust's mission and objectives
+                </p>
+            </div>
+
+            <!-- Address (Optional) -->
+            <div class="mb-6">
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                    Address
+                </label>
+                <textarea id="address" 
+                          name="address" 
+                          rows="3"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tenant-primary focus:border-tenant-primary
+                                 <%= fieldErrors.address ? 'border-red-300 bg-red-50' : '' %>"
+                          placeholder="Trust's registered address"><%= formData.address || '' %></textarea>
+                <% if (fieldErrors.address) { %>
+                    <p class="mt-1 text-sm text-red-600"><%= fieldErrors.address %></p>
+                <% } %>
+                <p class="mt-1 text-sm text-gray-500">
+                    Optional registered address of the trust
+                </p>
+            </div>
+
+            <!-- Trust Status -->
+            <div class="mb-8">
+                <div class="flex items-center">
+                    <input type="checkbox" 
+                           id="is_active" 
+                           name="is_active" 
+                           value="true"
+                           <%= formData.is_active !== false ? 'checked' : '' %>
+                           class="h-4 w-4 text-tenant-primary focus:ring-tenant-primary border-gray-300 rounded">
+                    <label for="is_active" class="ml-2 block text-sm text-gray-900">
+                        Trust is active and operational
+                    </label>
+                </div>
+                <p class="mt-1 text-sm text-gray-500">
+                    Only active trusts can create schools and manage students
+                </p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <div class="text-sm text-gray-500">
+                    <span class="font-medium">Step 1 of <%= wizard.config.steps.length %></span>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <a href="/setup" 
+                       class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tenant-primary">
+                        Cancel
+                    </a>
+                    
+                    <button type="submit" 
+                            id="submit-btn"
+                            class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-tenant-primary hover:bg-tenant-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tenant-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                        Continue to School Setup
+                        <svg class="ml-2 -mr-1 w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Step-specific JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('trust-basic-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const subdomainInput = document.getElementById('subdomain');
+    const subdomainPreview = document.getElementById('subdomain-preview');
+    
+    // Update subdomain preview
+    function updateSubdomainPreview() {
+        const subdomain = subdomainInput.value || 'your-subdomain';
+        subdomainPreview.textContent = subdomain + '.schoolerp.com';
+    }
+    
+    subdomainInput.addEventListener('input', updateSubdomainPreview);
+    updateSubdomainPreview(); // Initial update
+    
+    // Form submission with loading state
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...';
+        
+        try {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert checkbox to boolean
+            data.is_active = formData.has('is_active');
+            
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Show success message and redirect
+                if (result.data.completed) {
+                    window.location.href = result.data.redirect;
+                } else {
+                    // Continue to next step
+                    window.location.href = result.data.redirect;
+                }
+            } else {
+                // Handle errors
+                if (result.error.code === 'VALIDATION_ERROR' && result.error.details) {
+                    // Display field-specific errors
+                    result.error.details.forEach(error => {
+                        if (error.path && error.path.length > 0) {
+                            const field = document.getElementById(error.path[0]);
+                            if (field) {
+                                field.classList.add('border-red-300', 'bg-red-50');
+                                
+                                // Remove existing error message
+                                const existingError = field.parentNode.querySelector('.text-red-600');
+                                if (existingError) existingError.remove();
+                                
+                                // Add new error message
+                                const errorMsg = document.createElement('p');
+                                errorMsg.className = 'mt-1 text-sm text-red-600';
+                                errorMsg.textContent = error.message;
+                                field.parentNode.appendChild(errorMsg);
+                            }
+                        }
+                    });
+                } else {
+                    alert('Error: ' + (result.error.message || 'Unknown error occurred'));
+                }
+            }
+        } catch (error) {
+            console.error('Submit error:', error);
+            alert('An error occurred while submitting the form. Please try again.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Continue to School Setup <svg class="ml-2 -mr-1 w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+        }
+    });
+    
+    // Clear field errors on input
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('border-red-300', 'bg-red-50');
+            const errorMsg = this.parentNode.querySelector('.text-red-600');
+            if (errorMsg) errorMsg.remove();
+        });
+    });
+});
+</script>
+` } %>

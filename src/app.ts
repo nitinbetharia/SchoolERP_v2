@@ -15,7 +15,10 @@ import { controllers as attdControllers, attdRBAC } from './modules/attd';
 import { controllers as reptControllers, reptRBAC } from './modules/rept';
 import { controllers as dashControllers, dashTrustAdminRBAC, dashSchoolAdminRBAC, dashTeacherRBAC } from './modules/dash';
 import { controllers as commControllers, commMessagingRBAC, commAnnouncementRBAC, commEmergencyRBAC } from './modules/comm';
+import authRouter from './routes/auth';
+import setupRouter from './routes/setup';
 import type { Request, Response } from 'express';
+// Session type declarations are in types/session.d.ts
 
 // Load env (if not already loaded)
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -52,9 +55,9 @@ app.use(
 );
 
 // Views (EJS)
-app.set('views', path.join(process.cwd(), 'views'));
+app.set('views', path.join(__dirname, 'web', 'views'));
 app.set('view engine', 'ejs');
-app.use('/public', express.static(path.join(process.cwd(), 'public')));
+app.use(express.static(path.join(__dirname, 'web', 'public')));
 
 // API v1 router
 const api = express.Router();
@@ -172,7 +175,29 @@ api.post('/auth/tokens', authLimiter, authControllers.handle_auth_02_002);    //
 
 app.use('/api/v1', api);
 
-// Root
-app.get('/', (_req: Request, res: Response) => {
-  res.send('School ERP API running. See /api/v1/health');
+// Frontend Routes
+app.use('/auth', authRouter);
+app.use('/setup', setupRouter);
+
+// Dashboard and other frontend routes
+app.get('/dashboard', (req: Request, res: Response) => {
+  if (!(req.session as any)?.user) {
+    return res.redirect('/auth/login');
+  }
+  res.render('dashboard/index', {
+    title: 'Dashboard',
+    pageHeader: {
+      title: 'Welcome back!',
+      description: 'Manage your school efficiently'
+    }
+  });
+});
+
+// Root - redirect to dashboard or login
+app.get('/', (req: Request, res: Response) => {
+  if ((req.session as any)?.user) {
+    res.redirect('/dashboard');
+  } else {
+    res.redirect('/auth/login');
+  }
 });
